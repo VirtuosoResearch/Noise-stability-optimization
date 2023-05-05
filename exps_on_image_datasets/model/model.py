@@ -28,22 +28,22 @@ class MnistModel(nn.Module):
 
 class MLP(nn.Module):
 
-    def __init__(self, input_dim = 150528, hidden_dim = 256, n_classes = 10):
+    def __init__(self, input_dim, hidden_dim, n_classes, n_layers=1):
         super(MLP, self).__init__()
-        self.feature_extractor = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim), 
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim*2),
-            nn.ReLU(),
-            nn.Linear(hidden_dim*2, hidden_dim*2),
-            nn.ReLU()
-            )
-        self.pred_head = nn.Linear(hidden_dim*2, n_classes)
+        self.n_layers = n_layers
+        self.feature_extractor = []
+        for i in range(n_layers):
+            if i == 0:
+                self.feature_extractor.append(nn.Linear(input_dim, hidden_dim))
+            else:
+                self.feature_extractor.append(nn.Linear(hidden_dim, hidden_dim))
+            self.feature_extractor.append(nn.ReLU())
+        self.feature_extractor = nn.Sequential(*self.feature_extractor)
+        self.pred_head = nn.Linear(hidden_dim, n_classes)
 
     def reset_parameters(self, *args):
-        self.feature_extractor[0].reset_parameters()
-        self.feature_extractor[2].reset_parameters()
-        self.feature_extractor[4].reset_parameters()
+        for i in range(self.n_layers):
+            self.feature_extractor[2*i].reset_parameters()
         self.pred_head.reset_parameters()
 
     def forward(self, x):

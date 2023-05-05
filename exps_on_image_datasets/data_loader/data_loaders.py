@@ -19,6 +19,19 @@ class MatchChannel(object):
             pic = pic.repeat(3,1,1)
         return pic
 
+class MnistDataLoader(BaseDataLoader):
+    """
+    MNIST data loading demo using BaseDataLoader
+    """
+    def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
+        trsfm = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.1307,), (0.3081,))
+        ])
+        self.data_dir = data_dir
+        self.dataset = datasets.MNIST(self.data_dir, train=training, download=True, transform=trsfm)
+        super().__init__(self.dataset, batch_size, shuffle, validation_split, test_split=0, num_workers=num_workers)
+
 class Cifar10DataLoader(BaseDataLoader):
     def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", **kwargs):
         training = phase == "train"

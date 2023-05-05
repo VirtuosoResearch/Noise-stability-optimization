@@ -78,7 +78,11 @@ class Trainer:
         """
         self.model.train()
         self.train_metrics.reset()
-        for batch_idx, (data, target, index) in enumerate(self.train_data_loader):
+        for batch_idx, batch in enumerate(self.train_data_loader):
+            if len(batch) == 3:
+                data, target, index = batch
+            else:
+                data, target = batch
             data, target = data.to(self.device), target.to(self.device)
 
             self.optimizer.zero_grad()
@@ -113,7 +117,11 @@ class Trainer:
         self.model.eval()
         self.valid_metrics.reset()
         with torch.no_grad():
-            for batch_idx, (data, target, index) in enumerate(self.valid_data_loader):
+            for batch_idx, batch in enumerate(self.valid_data_loader):
+                if len(batch) == 3:
+                    data, target, index = batch
+                else:
+                    data, target = batch
                 data, target = data.to(self.device), target.to(self.device)
 
                 output = self.model(data)
@@ -190,7 +198,11 @@ class Trainer:
         total_metrics = torch.zeros(len(self.metric_ftns))
 
         with torch.no_grad():
-            for i, (data, target, index) in enumerate(self.test_data_loader):
+            for i, batch in enumerate(self.test_data_loader):
+                if len(batch) == 3:
+                    data, target, index = batch
+                else:
+                    data, target = batch
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
 
@@ -277,7 +289,11 @@ class Trainer:
         total_metrics = torch.zeros(len(self.metric_ftns))
 
         with torch.no_grad():
-            for i, (data, target, index) in enumerate(self.valid_data_loader):
+            for i, batch in enumerate(self.valid_data_loader):
+                if len(batch) == 3:
+                    data, target, index = batch
+                else:
+                    data, target = batch
                 data, target = data.to(self.device), target.to(self.device)
                 output = self.model(data)
 

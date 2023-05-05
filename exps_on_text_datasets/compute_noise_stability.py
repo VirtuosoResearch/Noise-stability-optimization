@@ -21,11 +21,18 @@ from utils.util import prepare_inputs
 from utils.hessian import get_layers, compute_hessian_traces, set_seed
 
 ''' Define a function to calculate stability '''
-def perturbe_model_weights(state_dict, eps=0.001):
+def perturbe_model_weights(state_dict, eps=0.001, use_neg = False, perturbation = {}):
+    if not use_neg:
+        perturbation = {} 
     for key, value in state_dict.items():
         if ("encoder" in key or "classifier" in key) and "weight" in key and ("LayerNorm" not in key):
-            state_dict[key] += torch.randn_like(value)*eps
-    return state_dict
+            if use_neg:
+                state_dict[key] -= perturbation[key]
+            else:
+                tmp_perturb = torch.randn_like(value)*eps
+                state_dict[key] += tmp_perturb
+                perturbation[key] = tmp_perturb
+    return state_dict, perturbation
 
 def compute_loss(model, data_loader, device = "cpu", batch_num=100):
     loss = 0
@@ -43,28 +50,38 @@ def compute_loss(model, data_loader, device = "cpu", batch_num=100):
 
     return loss/batch_count
 
-def calculate_stability(model, data_loader, eps=1e-3, device = "cpu", runs = 100, batch_num = 100):
+def calculate_stability(model, data_loader, eps=1e-3, device = "cpu", runs = 20, batch_num = 100):
     ''' Calculate pred_vectors for model before perturbation '''
     loss_before = compute_loss(model, data_loader, device=device, batch_num=batch_num)
     print(f"Loss before: {loss_before}")
     state_dict_before = deep_copy(model.state_dict())
-
-    print(f"Loss before: {loss_before}")
 
     '''
     Calculate the perturbed loss
     '''
     differences = []
     for i in range(runs):
+        differece = 0
         state_dict_after = deep_copy(state_dict_before)
-        state_dict_after = perturbe_model_weights(state_dict_after, eps = eps)
+        state_dict_after, perturbations = perturbe_model_weights(state_dict_after, eps = eps)
+        model.load_state_dict(state_dict_after)
+        # print(list(perturbations.keys()))
+        
+        loss_after = compute_loss(model, data_loader, device=device)
+        differece += loss_after - loss_before
+        print(f"Loss after: {loss_after}")
+        # differences.append(differece.cpu().item())
+
+        state_dict_after = deep_copy(state_dict_before)
+        state_dict_after, _ = perturbe_model_weights(state_dict_after, eps = eps, use_neg=True, perturbation = perturbations)
         model.load_state_dict(state_dict_after)
         
-        loss_after = compute_loss(model, data_loader, device=device, batch_num=batch_num)
-        differece = loss_after - loss_before
+        loss_after = compute_loss(model, data_loader, device=device)
+        differece += loss_after - loss_before
         print(f"Loss after: {loss_after}")
-        differences.append(differece.cpu().item())
+        differences.append(differece.cpu().item()/2)
     return differences
+
 
 def main(config, args):
     set_seed(0)
@@ -81,7 +98,7 @@ def main(config, args):
         train_batch_size=config["data_loader"]["args"]["train_batch_size"],
         eval_batch_size=config["data_loader"]["args"]["eval_batch_size"]
     )
-    test_data_loader = None
+    # test_data_loader = None
 
     # Get the metric function
     if args.task_name is not None:

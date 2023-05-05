@@ -202,8 +202,8 @@ class GLUETrainer:
                                      "Training stops.".format(self.early_stop))
                     break
 
-            if improved:
-                self._save_checkpoint(epoch)
+            # if improved:
+            self._save_checkpoint(epoch)
         return log
 
     def test(self):

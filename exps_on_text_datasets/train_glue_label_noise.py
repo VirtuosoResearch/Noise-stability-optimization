@@ -21,7 +21,6 @@ from utils import deep_copy, prepare_device
 from utils.dual_t import (compose_T_matrices, est_t_matrix,
                           get_transition_matrices)
 
-
 def init_weights(model):
     for name, module in model.named_modules():
         """Initialize the weights: Keep the pre-trained embeddings"""
@@ -84,7 +83,7 @@ def main(config, args):
 
     runs = 1 if args.random_init else args.runs
     metrics = {}
-    for i in range(runs):
+    for run in range(runs):
         # Optimizer
         # Split weights in two groups, one with weight decay and the other not.
         no_decay = ["bias", "LayerNorm.weight"]
@@ -148,9 +147,9 @@ def main(config, args):
                 )
         else:
             checkpoint_dir = os.path.join("saved", 
-                "{}_{}_{}_{}_noise_rate_{}".format(
+                "{}_{}_{}_{}_noise_rate_{}_run_{}".format(
                     args.task_name, args.random_init, args.reg_method, config['optimizer']['args']['weight_decay'],
-                    args.noise_rate
+                    args.noise_rate, run
                 ))
             trainer = ConstraintGLUETrainer(model, metric, optimizer, lr_scheduler,
                             config=config,
