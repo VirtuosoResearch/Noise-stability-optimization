@@ -167,10 +167,16 @@ def main(args):
     device = torch.device(f"cuda:{args.device}" if args.device != "cpu" else "cpu")
     
     data_loader = train_loader
-
+    # model.load_state_dict(
+    #             torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}" + ".pth")
+    #         )
+    # model = model.to(device)
+    # print(compute_loss(model, train_loader, device, batch_num=10000))
+    # print(compute_loss(model, test_loader, device, batch_num=10000))
     if args.compute_hessian_trace:
         traces = []
         sample_count = 0
+        max_traces = np.zeros(3); max_loss = 0
         model.eval()
         for data in data_loader:
             model.load_state_dict(
@@ -183,10 +189,15 @@ def main(args):
 
             layer_traces = compute_hessian_traces(model, loss)
             
+            max_traces = np.maximum(max_traces, layer_traces)
+            max_loss = np.maximum(max_loss, loss.cpu().item())
+
             traces.append(np.sum(layer_traces))
             # print(layer_traces)
             print("Current layer traces: {}".format(np.sum(layer_traces)))
             print("Traces mean: {}".format(np.mean(traces)))
+            print("Max traces: {}".format(max_traces))
+            print("Max loss: {}".format(max_loss))
 
             sample_count += 1
             if sample_count > args.sample_size:

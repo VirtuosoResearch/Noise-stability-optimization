@@ -66,7 +66,7 @@ class Trainer:
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns])
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns])
 
-        self._save_checkpoint(0, name="model_epoch_0.pth")
+        # self._save_checkpoint(0, name="model_epoch_0.pth")
 
 
     def _train_epoch(self, epoch):
@@ -160,7 +160,6 @@ class Trainer:
                 self.logger.info('    {:15s}: {}'.format(str(key), value))
 
             # evaluate model performance according to configured metric, save best checkpoint as model_best
-            best = False
             if self.mnt_mode != 'off':
                 try:
                     # check whether model performance improved or not, according to specified metric(mnt_metric)
@@ -175,7 +174,6 @@ class Trainer:
                 if improved:
                     self.mnt_best = log[self.mnt_metric]
                     not_improved_count = 0
-                    best = True
                 else:
                     not_improved_count += 1
 
@@ -184,7 +182,7 @@ class Trainer:
                                      "Training stops.".format(self.early_stop))
                     break
 
-            if best:
+            if improved:
                 self._save_checkpoint(epoch)
 
     def test(self):

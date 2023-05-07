@@ -144,4 +144,4 @@ def compute_hessian_traces(model, batch, device, maxIter=200, tol=1e-4):
             break
         else:
             trace = np.mean(trace_vhv)
-    return np.mean(np.array(layer_traces), axis=0)
+    return np.mean(np.array(layer_traces), axis=0), loss.detach().cpu().item()

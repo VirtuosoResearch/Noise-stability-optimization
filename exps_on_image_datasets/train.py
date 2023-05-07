@@ -19,7 +19,7 @@ def main(config, args):
     test_data_loader = MnistDataLoader(data_dir="./data", batch_size=args.batch_size, shuffle=False, num_workers=4, training=False)
     valid_data_loader = test_data_loader
 
-    model = module_arch.MLP(input_dim=28*28, hidden_dim=128, n_classes=10, n_layers=1)
+    model = module_arch.MLP(input_dim=28*28, hidden_dim=args.hidden_dim, n_classes=10, n_layers=1)
 
     # prepare for (multi-device) GPU training
     device, device_ids = prepare_device(config['n_gpu'])
@@ -42,7 +42,7 @@ def main(config, args):
 
         checkpoint_dir = os.path.join(
         "./saved", 
-        "{}_{}_run_{}".format(config["arch"]["type"], config["data_loader"]["type"], run))
+        "{}_{}_hidden_{}_run_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.hidden_dim, run))
         trainer = Trainer(model, criterion, metrics, optimizer,
                         config=config,
                         device=device,
@@ -67,6 +67,7 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
     args.add_argument('--runs', type=int, default=3)
     args.add_argument('--batch_size', type=int, default=256)
+    args.add_argument('--hidden_dim', type=int, default=32)
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')

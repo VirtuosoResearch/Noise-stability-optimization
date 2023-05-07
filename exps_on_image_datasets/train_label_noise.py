@@ -14,7 +14,14 @@ from data_loader.random_noise import label_noise
 
 from model.modeling_vit import VisionTransformer, CONFIGS
 from utils.dual_t import get_transition_matrices, compose_T_matrices
+from utils.sam import SAM
+from utils.nsm import NSM
 
+'''
+TODO:
+    - Add the algorithms
+    - Test which datasets work
+'''
 
 def main(config, args):
     logger = config.get_logger('train')
@@ -26,13 +33,15 @@ def main(config, args):
         test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test")
     elif config["data_loader"]["type"] == "AircraftsDataLoader" or config["data_loader"]["type"] == "DomainNetDataLoader":
         train_data_loader = config.init_obj('data_loader', module_data, phase = "train")
-        valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
+        # valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
         test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
+        valid_data_loader = test_data_loader
     elif config["data_loader"]["type"] == "BirdsDataLoader" or \
         config["data_loader"]["type"] == "CarsDataLoader" or \
         config["data_loader"]["type"] == "DogsDataLoader" or \
         config["data_loader"]["type"] == "IndoorDataLoader" or \
-        config["data_loader"]["type"] == "Cifar10DataLoader":
+        config["data_loader"]["type"] == "Cifar10DataLoader" or \
+        config["data_loader"]["type"] == "Cifar100DataLoader":
         train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.1, phase = "train")
         valid_data_loader = train_data_loader.split_validation()
         test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
@@ -103,51 +112,11 @@ def main(config, args):
         optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
         lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
 
-        if args.constraint_reweight:
+        if args.train_ls:
             checkpoint_dir = os.path.join(
-            "./saved_label_noise", 
-            "{}_{}_{}_constraint_reweight".format(
-                config["arch"]["type"], 
-                config["data_loader"]["type"],
-                domain_name
-            ))
-            checkpoint_dir = checkpoint_dir + ("_synthethic_{}".format(args.noise_rate) if args.synthetic_noise else "")
-
-            if args.load_matrix:
-                matrix_path = checkpoint_dir + "_confusion_matrix"
-                if os.path.exists(matrix_path):
-                    confusion_matrix = np.load(os.path.join(matrix_path, "matrix.npy"))
-                    logger.info("Loaded confusion matrix!")
-                else:
-                    os.mkdir(matrix_path)
-                    # Estimate the transition matrix
-                    # 1. Train a classifier
-                    trainer = ConstraintTrainer(model, criterion, metrics, optimizer,
-                                config=config,
-                                device=device,
-                                train_data_loader=train_data_loader,
-                                valid_data_loader=valid_data_loader,
-                                test_data_loader=test_data_loader,
-                                lr_scheduler=lr_scheduler,
-                                checkpoint_dir = checkpoint_dir)
-                    trainer.train()
-                    # 2. Load the trained best model
-                    best_path = os.path.join(checkpoint_dir, 'model_best.pth')
-                    state_dict  = torch.load(best_path, map_location=device)["state_dict"]
-                    model.load_state_dict(state_dict)
-                    # 3. Estimate transition matrix using T estimate
-                    T_spadesuit, T_clubsuit = get_transition_matrices(
-                        train_data_loader, model, num_class=config["arch"]["args"]["n_classes"], device=device
-                    )
-                    # 4. Compose trainsition matrix 
-                    confusion_matrix = compose_T_matrices(T_spadesuit=T_spadesuit, T_clubsuit = T_clubsuit)
-                    logger.info(confusion_matrix)
-                    # 5. Save transition matrix
-                    np.save(os.path.join(matrix_path, "matrix.npy"), confusion_matrix)
-            else:
-                confusion_matrix = None
-
-            trainer = ConstraintReweightTrainer(model, criterion, metrics, optimizer,
+            "./saved", 
+            "{}_{}_ls".format(config["arch"]["type"], config["data_loader"]["type"]))
+            trainer = LabelSmoothTrainer(model, criterion, metrics, optimizer,
                         config=config,
                         device=device,
                         train_data_loader=train_data_loader,
@@ -155,23 +124,55 @@ def main(config, args):
                         test_data_loader=test_data_loader,
                         lr_scheduler=lr_scheduler,
                         checkpoint_dir=checkpoint_dir,
-                        reweight_epoch=args.reweight_epoch,
-                        noise_rate = args.reweight_noise_rate,
-                        confusion_matrix=confusion_matrix)
-            lambda_extractor = config["reg_extractor"]
-            lambda_pred_head = config["reg_predictor"]
-            scale_factor = config["scale_factor"]
-            print(lambda_extractor, lambda_pred_head, scale_factor)
-            if config["reg_method"] == "constraint":
-                trainer.add_constraint(
-                    norm = config["reg_norm"], lambda_extractor = lambda_extractor, lambda_pred_head=lambda_pred_head, 
-                    state_dict = source_state_dict, scale_factor=scale_factor
-                )
-            if config["reg_method"] == "penalty":
-                trainer.add_penalty(
-                    norm = config["reg_norm"], lambda_extractor = lambda_extractor, lambda_pred_head=lambda_pred_head, 
-                    state_dict = source_state_dict, scale_factor=scale_factor
-                )
+                        alpha=args.ls_alpha)
+        elif args.train_mixup:
+            checkpoint_dir = os.path.join(
+            "./saved", 
+            "{}_{}_rand_init_{}_mixup_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
+                                                  args.rand_init, args.mixup_alpha))
+            trainer = MixupTrainer(model, criterion, metrics, optimizer,
+                        config=config,
+                        device=device,
+                        train_data_loader=train_data_loader,
+                        valid_data_loader=valid_data_loader,
+                        test_data_loader=test_data_loader,
+                        lr_scheduler=lr_scheduler,
+                        checkpoint_dir=checkpoint_dir,
+                        alpha=args.mixup_alpha)
+        elif args.train_sam:
+            checkpoint_dir = os.path.join(
+            "./saved", 
+            "{}_{}_sam_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.sam_rho))
+            base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
+            optimizer = SAM(model.parameters(), base_optimizer, rho=args.sam_rho, 
+                        adaptive=False, **dict(config["optimizer"]["args"]))
+            lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
+            trainer = SAMTrainer(model, criterion, metrics, optimizer,
+                            config=config,
+                            device=device,
+                            train_data_loader=train_data_loader,
+                            valid_data_loader=valid_data_loader,
+                            test_data_loader=test_data_loader,
+                            lr_scheduler=lr_scheduler,
+                            checkpoint_dir=checkpoint_dir)
+        elif args.train_nsm:
+            checkpoint_dir = os.path.join(
+                "./saved",
+                "{}_{}_nsm_{}_{}_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg))
+            base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
+            optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, **dict(config["optimizer"]["args"]))
+            lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
+            trainer = NSMTrainer(model, criterion, metrics, optimizer,
+                            config=config,
+                            device=device,
+                            train_data_loader=train_data_loader,
+                            valid_data_loader=valid_data_loader,
+                            test_data_loader=test_data_loader,
+                            lr_scheduler=lr_scheduler,
+                            checkpoint_dir=checkpoint_dir,
+                            nsm_lam=args.nsm_lam,
+                            num_perturbs=args.num_perturbs,
+                            use_neg=args.use_neg)
         else:
             checkpoint_dir = os.path.join(
             "./saved_label_noise", 
@@ -186,7 +187,8 @@ def main(config, args):
                             valid_data_loader=valid_data_loader,
                             test_data_loader=test_data_loader,
                             lr_scheduler=lr_scheduler,
-                            checkpoint_dir = checkpoint_dir)
+                            checkpoint_dir = checkpoint_dir,
+                            gradient_update_step=args.gradient_update_step)
                             
             lambda_extractor = config["reg_extractor"]
             lambda_pred_head = config["reg_predictor"]
@@ -236,6 +238,23 @@ if __name__ == '__main__':
     args.add_argument('--reweight_epoch', type=int, default=1)
     args.add_argument('--reweight_noise_rate', type=float, default=0.8)
 
+    args.add_argument('--gradient_update_step', type=int, default=1)
+
+    args.add_argument('--train_ls', action="store_true")
+    args.add_argument('--ls_alpha', type=float, default=0.15)
+
+    args.add_argument('--train_mixup', action="store_true")
+    args.add_argument('--mixup_alpha', type=float, default=0.2)
+
+    args.add_argument('--train_sam', action="store_true")
+    args.add_argument('--sam_rho', type=float, default=0.05)
+
+    args.add_argument('--train_nsm', action="store_true")
+    args.add_argument('--use_neg', action="store_true")
+    args.add_argument('--nsm_sigma', type=float, default=0.01)
+    args.add_argument('--num_perturbs', type=int, default=1)
+    args.add_argument('--nsm_lam', type=float, default=0.5)
+
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
     options = [
@@ -251,6 +270,7 @@ if __name__ == '__main__':
         CustomArgs(['--domain'], type=str, target="data_loader;args;domain"),
         CustomArgs(['--sample'], type=int, target="data_loader;args;sample"),
         CustomArgs(['--early_stop'], type=int, target="trainer;early_stop"),
+        CustomArgs(['--epochs'], type=int, target="trainer;epochs"),
     ]
     config, args = ConfigParser.from_args(args, options)
     print(config)

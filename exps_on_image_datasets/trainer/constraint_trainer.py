@@ -14,7 +14,7 @@ from collections import OrderedDict
 class ConstraintTrainer(Trainer):
 
     def __init__(self, model, criterion, metric_ftns, optimizer, config, 
-        device, train_data_loader, valid_data_loader, test_data_loader, lr_scheduler, checkpoint_dir):
+        device, train_data_loader, valid_data_loader, test_data_loader, lr_scheduler, checkpoint_dir, gradient_update_step = 1):
         super(ConstraintTrainer, self).__init__(model, criterion, metric_ftns, optimizer, config, 
         device, train_data_loader, valid_data_loader, test_data_loader, lr_scheduler, checkpoint_dir)
         self.penalty = []
@@ -25,6 +25,8 @@ class ConstraintTrainer(Trainer):
         self.num_classes = config["arch"]["args"]["n_classes"]
         # labels = train_data_loader.dataset.labels
         # self.predictions = torch.zeros(len(labels), self.num_classes, dtype=torch.float).to(device)
+        self.gradient_update_step = gradient_update_step
+        self.global_step = 0
 
     def add_penalty(self, norm, lambda_extractor, lambda_pred_head, state_dict=None, scale_factor=1.0):
         self.penalty.append(
@@ -179,7 +181,9 @@ class ConstraintTrainer(Trainer):
             """Apply Penalties"""
 
             loss.backward()
-            self.optimizer.step()
+            self.global_step += 1
+            if self.global_step % self.gradient_update_step == 0:
+                self.optimizer.step()
 
             """Apply Constraints"""
             for constraint in self.constraints:

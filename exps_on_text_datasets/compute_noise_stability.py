@@ -121,6 +121,8 @@ def main(config, args):
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
     
+    # print(compute_loss(model, train_data_loader, device=device, batch_num=10000))
+    # print(compute_loss(model, test_data_loader, device=device, batch_num=10000))
     data_loader = train_data_loader
     if not args.compute_hessian_trace:
         diff_losses = calculate_stability(model, data_loader, eps=args.eps, device = device, batch_num=args.sample_size)
@@ -130,6 +132,7 @@ def main(config, args):
 
     if args.compute_hessian_trace:
         traces = []
+        max_traces = np.zeros(73); max_loss = 0
         sample_count = 0
         model.eval()
         for _, batch in enumerate(data_loader):
@@ -137,17 +140,22 @@ def main(config, args):
                 torch.load(os.path.join(file, args.checkpoint_name+".pth"))["state_dict"]
             )
 
-            layer_traces = compute_hessian_traces(model, batch, device = device)
-            
+            layer_traces, loss = compute_hessian_traces(model, batch, device = device)
+            max_traces = np.maximum(max_traces, layer_traces)
+            max_loss = max(max_loss, loss)
+
             traces.append(np.sum(layer_traces))
 
             logger.info("Current layer traces: {}".format(np.sum(layer_traces)))
             logger.info("Traces mean: {}".format(np.mean(traces)))
+            logger.info("Max layer traces: {}".format(max_traces))
+            logger.info("Max loss: {}".format(max_loss))
 
             sample_count += 1
             if sample_count > args.sample_size:
                 break
-
+        
+        
 
 if __name__ == '__main__':
     args = argparse.ArgumentParser(description='PyTorch Template')
