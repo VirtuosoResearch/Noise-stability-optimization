@@ -139,6 +139,20 @@ def main(config, args):
                         lr_scheduler=lr_scheduler,
                         checkpoint_dir=checkpoint_dir,
                         alpha=args.mixup_alpha)
+        elif args.train_swa:
+            checkpoint_dir = os.path.join(
+            "./saved", 
+            "{}_{}_swa_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.swa_epoch, args.swa_lr))
+            trainer = SWATrainer(model, criterion, metrics, optimizer,
+                        config=config,
+                        device=device,
+                        train_data_loader=train_data_loader,
+                        valid_data_loader=valid_data_loader,
+                        test_data_loader=test_data_loader,
+                        lr_scheduler=lr_scheduler,
+                        checkpoint_dir=checkpoint_dir,
+                        swa_start=args.swa_epoch,
+                        swa_lr=args.swa_lr)
         elif args.train_sam:
             checkpoint_dir = os.path.join(
             "./saved", 
@@ -245,6 +259,10 @@ if __name__ == '__main__':
 
     args.add_argument('--train_mixup', action="store_true")
     args.add_argument('--mixup_alpha', type=float, default=0.2)
+
+    args.add_argument('--train_swa', action="store_true")
+    args.add_argument('--swa_epoch', type=int, default=20)
+    args.add_argument('--swa_lr', type=float, default=0.005)
 
     args.add_argument('--train_sam', action="store_true")
     args.add_argument('--sam_rho', type=float, default=0.05)
