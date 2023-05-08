@@ -15,7 +15,7 @@ class NSM(torch.optim.Optimizer):
         ''' store the gradients of original weights '''
         for group in self.param_groups:
             for p in group["params"]:
-                if p.grad is None: continue
+                if not p.requires_grad: continue
                 if store_weights: 
                     self.state[p]["old_p"] = p.data.clone()
                     self.state[p]["old_gradients"] = p.grad.data.clone()*update_weight
@@ -30,7 +30,7 @@ class NSM(torch.optim.Optimizer):
         ''' take a perturbation step of the original weights '''
         for group in self.param_groups:
             for p in group["params"]:
-                if p.grad is None: continue
+                if not p.requires_grad: continue
                 p.data = self.state[p]["old_p"].clone()  # restore original weights 
                 if store_perturb:
                     e_w = torch.randn_like(p.data) * group["sigma"]
@@ -46,7 +46,7 @@ class NSM(torch.optim.Optimizer):
     def second_step(self, zero_grad=False):
         for group in self.param_groups:
             for p in group["params"]:
-                if p.grad is None: continue
+                if not p.requires_grad: continue
                 p.data = self.state[p]["old_p"]  # get back to original weights
                 p.grad.data = self.state[p]["old_gradients"]
 

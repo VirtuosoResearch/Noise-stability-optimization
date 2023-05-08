@@ -53,6 +53,12 @@ def main(config, args):
         train_data_loader = config.init_obj('data_loader', module_data)
         valid_data_loader = train_data_loader.split_validation()
         test_data_loader = train_data_loader.split_test()
+    elif config["data_loader"]["type"] == "MessidorDataLoader" or \
+        config["data_loader"]["type"] == "AptosDataLoader" or \
+        config["data_loader"]["type"] == "JinchiDataLoader":
+        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.2, phase = "train")
+        valid_data_loader = train_data_loader.split_validation()
+        test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
 
     if args.synthetic_noise:
         if config["data_loader"]["type"] == "DomainNetDataLoader" or config["data_loader"]["type"] == "AnimalAttributesDataLoader":
@@ -115,7 +121,7 @@ def main(config, args):
         if args.train_ls:
             checkpoint_dir = os.path.join(
             "./saved", 
-            "{}_{}_ls".format(config["arch"]["type"], config["data_loader"]["type"]))
+            "{}_{}_ls_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.ls_alpha))
             trainer = LabelSmoothTrainer(model, criterion, metrics, optimizer,
                         config=config,
                         device=device,
@@ -128,8 +134,7 @@ def main(config, args):
         elif args.train_mixup:
             checkpoint_dir = os.path.join(
             "./saved", 
-            "{}_{}_rand_init_{}_mixup_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
-                                                  args.rand_init, args.mixup_alpha))
+            "{}_{}_mixup_{}".format(config["arch"]["type"], config["data_loader"]["type"],  args.mixup_alpha))
             trainer = MixupTrainer(model, criterion, metrics, optimizer,
                         config=config,
                         device=device,

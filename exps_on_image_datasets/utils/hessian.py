@@ -57,6 +57,7 @@ def compute_hessians_trace(model, criterion, data, target, device = "cpu", maxIt
     # Get parameters and gradients of corresponding layer
     data, target = data.to(device), target.to(device)
     model = model.to(device)    
+    model.eval()
     output = model(data)
     loss = criterion(output, target)
 
@@ -91,10 +92,11 @@ def compute_hessians_trace(model, criterion, data, target, device = "cpu", maxIt
     return np.mean(np.array(layer_traces), axis=0)
 
 """ Calculate Top Eigenvalue of Hessian """ 
-def compute_eigenvalue(model, criterion, data, target, device, maxIter=200, tol=1e-8, top_n=1):
+def compute_eigenvalue(model, criterion, data, target, device, maxIter=100, tol=1e-3, top_n=1):
     # Get parameters and gradients of corresponding layer
     data, target = data.to(device), target.to(device)
     model = model.to(device)    
+    model.eval()
     output = model(data)
     loss = criterion(output, target)
 
@@ -102,7 +104,7 @@ def compute_eigenvalue(model, criterion, data, target, device, maxIter=200, tol=
     weights = [module.weight for name, module in layers.items()]
     model.zero_grad()
     """ use negative loss to get the minimum eigenvalue here """
-    gradients = torch.autograd.grad(-loss, weights, retain_graph=True, create_graph=True)
+    gradients = torch.autograd.grad(loss, weights, retain_graph=True, create_graph=True)
 
     topn_eigenvalues = []
     eigenvectors = []
