@@ -33,9 +33,9 @@ def main(config, args):
         test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test")
     elif config["data_loader"]["type"] == "AircraftsDataLoader" or config["data_loader"]["type"] == "DomainNetDataLoader":
         train_data_loader = config.init_obj('data_loader', module_data, phase = "train")
-        # valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
+        valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
         test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
-        valid_data_loader = test_data_loader
+        # valid_data_loader = test_data_loader
     elif config["data_loader"]["type"] == "BirdsDataLoader" or \
         config["data_loader"]["type"] == "CarsDataLoader" or \
         config["data_loader"]["type"] == "DogsDataLoader" or \
@@ -160,7 +160,7 @@ def main(config, args):
                         swa_lr=args.swa_lr)
         elif args.train_sam:
             checkpoint_dir = os.path.join(
-            "./saved", 
+            "./saved_hessians", 
             "{}_{}_sam_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.sam_rho))
             base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
             optimizer = SAM(model.parameters(), base_optimizer, rho=args.sam_rho, 
@@ -176,7 +176,7 @@ def main(config, args):
                             checkpoint_dir=checkpoint_dir)
         elif args.train_nsm:
             checkpoint_dir = os.path.join(
-                "./saved",
+                "./saved_hessians",
                 "{}_{}_nsm_{}_{}_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg))
             base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
             optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, **dict(config["optimizer"]["args"]))
@@ -235,7 +235,7 @@ if __name__ == '__main__':
                       help='config file path (default: None)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
-    args.add_argument('-d', '--device', default=None, type=str,
+    args.add_argument('-d', '--device', default=None, type=str, nargs='+',
                       help='indices of GPUs to enable (default: all)')
     args.add_argument('--runs', type=int, default=3)
     args.add_argument('--data_frac', type=float, default=1.0)

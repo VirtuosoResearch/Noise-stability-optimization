@@ -50,6 +50,6 @@
         "verbosity": 2,
         
         "monitor": "max val_accuracy",
-        "early_stop": 10
+        "early_stop": 30
     }
 }

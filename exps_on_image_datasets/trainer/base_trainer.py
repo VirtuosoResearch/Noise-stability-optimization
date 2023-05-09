@@ -185,6 +185,9 @@ class Trainer:
             if improved:
                 self._save_checkpoint(epoch)
 
+            if epoch % 5 == 0:
+                self._save_checkpoint(epoch, name=f"model_epoch_{epoch}.pth")
+
     def test(self):
         best_path = os.path.join(self.checkpoint_dir, f'model_best.pth')
         if os.path.exists(best_path):
