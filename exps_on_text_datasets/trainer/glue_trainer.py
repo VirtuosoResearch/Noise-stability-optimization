@@ -203,7 +203,7 @@ class GLUETrainer:
                     break
 
             # if improved:
-            self._save_checkpoint(epoch)
+            self._save_checkpoint(epoch, name="model_epoch_{}".format(epoch))
         return log
 
     def test(self):
