@@ -2,8 +2,8 @@
     "name": "Constraint_CalTech",
     "n_gpu": 1,
 
-    "reg_method": "constraint",
-    "reg_norm": "inf-op",
+    "reg_method": "none",
+    "reg_norm": "none",
     "reg_extractor": 1,
     "reg_predictor": 1,
     "scale_factor": 1,
@@ -50,6 +50,6 @@
         "verbosity": 2,
         
         "monitor": "max val_accuracy",
-        "early_stop": 10
+        "early_stop": 30
     }
 }

@@ -53,13 +53,8 @@ compute the trace of hessian using Hutchinson's method
 https://github.com/amirgholami/PyHessian/blob/master/pyhessian/hessian.py
 """
 
-def compute_hessians_trace(model, criterion, data, target, device = "cpu", maxIter=100, tol=1e-3):
+def compute_hessians_trace(model, loss, device = "cpu", maxIter=100, tol=1e-3):
     # Get parameters and gradients of corresponding layer
-    data, target = data.to(device), target.to(device)
-    model = model.to(device)    
-    model.eval()
-    output = model(data)
-    loss = criterion(output, target)
 
     layers = get_layers(model)
     weights = [module.weight for name, module in layers.items()]
@@ -92,19 +87,50 @@ def compute_hessians_trace(model, criterion, data, target, device = "cpu", maxIt
     return np.mean(np.array(layer_traces), axis=0)
 
 """ Calculate Top Eigenvalue of Hessian """ 
-def compute_eigenvalue(model, criterion, data, target, device, maxIter=100, tol=1e-3, top_n=1):
-    # Get parameters and gradients of corresponding layer
-    data, target = data.to(device), target.to(device)
-    model = model.to(device)    
-    model.eval()
-    output = model(data)
-    loss = criterion(output, target)
-
+def compute_eigenvalue(model, loss, device, maxIter=100, tol=1e-8, top_n=1):
     layers = get_layers(model)
     weights = [module.weight for name, module in layers.items()]
     model.zero_grad()
     """ use negative loss to get the minimum eigenvalue here """
     gradients = torch.autograd.grad(loss, weights, retain_graph=True, create_graph=True)
+
+    topn_eigenvalues = []
+    eigenvectors = []
+    computed_dim = 0
+    while computed_dim < top_n:
+        eigenvalues = None
+        vs = [torch.randn_like(weight) for weight in weights]  # generate random vector
+        vs = normalization(vs)  # normalize the vector
+
+        for _ in range(maxIter):
+            vs = orthnormal(vs, eigenvectors)
+            model.zero_grad()
+
+            Hvs = torch.autograd.grad(gradients, weights, grad_outputs=vs, retain_graph=True)
+            tmp_eigenvalues = [ torch.sum(Hv*v).cpu().item() for (Hv, v) in zip(Hvs, vs)]
+
+            vs = normalization(Hvs)
+
+            if eigenvalues == None:
+                eigenvalues = tmp_eigenvalues
+            else:
+                if abs(sum(eigenvalues) - sum(tmp_eigenvalues)) / (abs(sum(eigenvalues)) +
+                                                        1e-6) < tol:
+                    break
+                else:
+                    eigenvalues = tmp_eigenvalues
+        topn_eigenvalues.append(eigenvalues)
+        eigenvectors.append(vs)
+        computed_dim += 1
+
+    return topn_eigenvalues, eigenvectors
+
+def compute_small_eigenvalue(model, loss, device, maxIter=100, tol=1e-8, top_n=1):
+    layers = get_layers(model)
+    weights = [module.weight for name, module in layers.items()]
+    model.zero_grad()
+    """ use negative loss to get the minimum eigenvalue here """
+    gradients = torch.autograd.grad(-loss, weights, retain_graph=True, create_graph=True)
 
     topn_eigenvalues = []
     eigenvectors = []
