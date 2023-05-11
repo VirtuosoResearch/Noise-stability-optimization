@@ -20,6 +20,7 @@ from transformers import (AdamW, AutoModelForSequenceClassification,
 from utils import deep_copy, prepare_device
 from utils.dual_t import (compose_T_matrices, est_t_matrix,
                           get_transition_matrices)
+from utils.nsm import NSM
 
 def init_weights(model):
     for name, module in model.named_modules():
@@ -113,38 +114,24 @@ def main(config, args):
             num_training_steps=config["trainer"]["max_train_steps"],
         )
         
-        if args.constraint_reweight:
+        if args.train_nsm:
+            base_optimizer = AdamW
+            optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, lr=config["optimizer"]["args"]["lr"])
+
             checkpoint_dir = os.path.join("saved", 
-                "{}_{}_{}_{}_noise_rate_{}_constraint_reweight".format(
-                    args.task_name, args.random_init, args.reg_method, config['optimizer']['args']['weight_decay'],
-                    args.noise_rate
+                "{}_nsm_{}_{}_{}_{}_run_{}".format(
+                    args.task_name, args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg, run
                 ))
-            trainer = ConstraintReweightTrainer(model, metric, optimizer, lr_scheduler,
+            trainer = NSMTrainer(model, metric, optimizer, lr_scheduler,
                             config=config,
                             device=device,
                             train_data_loader=train_data_loader,
                             valid_data_loader=valid_data_loader,
                             test_data_loader=test_data_loader,
                             checkpoint_dir = checkpoint_dir,
-                            noise_rate = args.reweight_noise_rate,
-                            reweight_epoch = args.reweight_epoch,
-                            num_classes=transformers_config.num_labels
-                            )
-            if args.reg_method == "constraint":
-                trainer.add_constraint(
-                    norm = args.reg_norm, 
-                    lambda_attention = args.reg_attention, 
-                    lambda_linear=args.reg_linear, 
-                    lambda_pred_head=args.reg_predictor, 
-                    state_dict=source_state_dict
-                )
-            if args.reg_method == "penalty":
-                trainer.add_penalties(
-                    norm = args.reg_norm, 
-                    lambda_extractor = args.reg_penalty_encoder, 
-                    lambda_pred_head=args.reg_penalty_predictor, 
-                    state_dict = source_state_dict
-                )
+                            nsm_lam=args.nsm_lam,
+                            num_perturbs=args.num_perturbs,
+                            use_neg=args.use_neg)
         else:
             checkpoint_dir = os.path.join("saved", 
                 "{}_{}_{}_{}_noise_rate_{}_run_{}".format(
@@ -221,6 +208,12 @@ if __name__ == '__main__':
     args.add_argument('--constraint_reweight', action="store_true")
     args.add_argument('--reweight_epoch', type=int, default=1)
     args.add_argument('--reweight_noise_rate', type=float, default=0.8)
+
+    args.add_argument('--train_nsm', action="store_true")
+    args.add_argument('--use_neg', action="store_true")
+    args.add_argument('--nsm_sigma', type=float, default=0.01)
+    args.add_argument('--num_perturbs', type=int, default=1)
+    args.add_argument('--nsm_lam', type=float, default=0.5)
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')
