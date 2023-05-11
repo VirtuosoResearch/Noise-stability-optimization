@@ -115,14 +115,15 @@ def main(config, args):
     device, device_ids = prepare_device(config['n_gpu'])
     file = os.path.join("./saved/", args.checkpoint_dir)
     model.load_state_dict(
-            torch.load(os.path.join(file, args.checkpoint_name+".pth"))["state_dict"]
+            torch.load(os.path.join(file, f"model_epoch_{args.epoch}.pth"))["state_dict"]
         )
     model = model.to(device)
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
-    
-    # print(compute_loss(model, train_data_loader, device=device, batch_num=10000))
-    # print(compute_loss(model, test_data_loader, device=device, batch_num=10000))
+    train_loss = compute_loss(model, train_data_loader, device=device, batch_num=10000)
+    test_loss = compute_loss(model, test_data_loader, device=device, batch_num=10000)
+    print("Training loss: {}".format(train_loss))
+    print("Test loss: {}".format(test_loss))
     data_loader = train_data_loader
     if not args.compute_hessian_trace:
         diff_losses = calculate_stability(model, data_loader, eps=args.eps, device = device, batch_num=args.sample_size)
@@ -137,10 +138,14 @@ def main(config, args):
         model.eval()
         for _, batch in enumerate(data_loader):
             model.load_state_dict(
-                torch.load(os.path.join(file, args.checkpoint_name+".pth"))["state_dict"]
+                torch.load(os.path.join(file, f"model_epoch_{args.epoch}.pth"))["state_dict"]
             )
 
-            layer_traces, loss = compute_hessian_traces(model, batch, device = device)
+            batch = prepare_inputs(batch, device)
+            outputs = model(**batch)
+            loss = outputs.loss
+
+            layer_traces, loss = compute_hessian_traces(model, loss, device = device)
             max_traces = np.maximum(max_traces, layer_traces)
             max_loss = max(max_loss, loss)
 
@@ -154,7 +159,21 @@ def main(config, args):
             sample_count += 1
             if sample_count > args.sample_size:
                 break
-        
+
+        pretrained_state_dict = torch.load(os.path.join(file, "model_epoch_0.pth"))["state_dict"]
+        state_dict = torch.load(os.path.join(file, f"model_epoch_{args.epoch}.pth"))["state_dict"]
+
+        weights = []
+        for key, val in state_dict.items():
+            if "weight" in key and ("LayerNorm" not in key and "embeddings" not in key and "pooler" not in key):
+                weights.append(val - pretrained_state_dict[key])
+
+        norms = np.array([torch.norm(w).item() for w in weights])
+        train_num = len(train_data_loader.dataset)
+        bound = max_loss*np.math.sqrt((max_traces.sum()*np.square(norms).sum())/train_num)
+
+        print("Generalization error: {}".format(test_loss - train_loss))
+        print("Bound: {}".format(bound))
         
 
 if __name__ == '__main__':
@@ -165,6 +184,7 @@ if __name__ == '__main__':
                       help='path to latest checkpoint (default: None)')
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')
+    args.add_argument("--epoch", type=int, default=1)
 
     args.add_argument('--task_name', type=str, default="mrpc")
     args.add_argument('--model_name_or_path', type=str, default="bert-base-cased")

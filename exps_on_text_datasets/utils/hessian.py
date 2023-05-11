@@ -26,17 +26,17 @@ def orthnormal(ws, vs_list):
     return normalization(ws)
 
 """ Calculate Top Eigenvalue of Hessian """ 
-def compute_eigenvalue(model, batch, device, maxIter=100, tol=1e-3, top_n=1):
-    # Get parameters and gradients of corresponding layer
-    batch = prepare_inputs(batch, device)
-    outputs = model(**batch)
-    loss = outputs.loss
+def compute_eigenvalue(model, loss, device, maxIter=100, tol=1e-3, top_n=1):
+    # # Get parameters and gradients of corresponding layer
+    # batch = prepare_inputs(batch, device)
+    # outputs = model(**batch)
+    # loss = outputs.loss
 
     layers = get_layers(model)
     weights = [module.weight for name, module in layers.items()]
     model.zero_grad()
     """ use negative loss to get the minimum eigenvalue here """
-    gradients = torch.autograd.grad(-loss, weights, retain_graph=True, create_graph=True)
+    gradients = torch.autograd.grad(loss, weights, retain_graph=True, create_graph=True)
 
     topn_eigenvalues = []
     eigenvectors = []
@@ -112,10 +112,10 @@ def set_seed(seed: int):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-def compute_hessian_traces(model, batch, device, maxIter=200, tol=1e-4):
-    batch = prepare_inputs(batch, device)
-    outputs = model(**batch)
-    loss = outputs.loss
+def compute_hessian_traces(model, loss, device, maxIter=200, tol=1e-4):
+    # batch = prepare_inputs(batch, device)
+    # outputs = model(**batch)
+    # loss = outputs.loss
 
     layers = get_layers(model)
     weights = []

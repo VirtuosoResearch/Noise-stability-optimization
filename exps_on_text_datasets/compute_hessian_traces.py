@@ -16,7 +16,8 @@ from trainer import *
 from transformers import (AdamW, AutoModelForSequenceClassification,
                           SchedulerType, get_scheduler)
 from utils import deep_copy, prepare_device
-from utils.hessian import compute_hessian_traces, set_seed
+from utils.hessian import compute_hessian_traces, set_seed, compute_eigenvalue
+from utils.util import prepare_inputs
 
 
 def main(config, args):
@@ -51,37 +52,50 @@ def main(config, args):
     device, device_ids = prepare_device(config['n_gpu'])
     file = os.path.join("./saved/", args.checkpoint_dir)
     model.load_state_dict(
-            torch.load(os.path.join(file, args.checkpoint_name+".pth"))["state_dict"]
+            torch.load(os.path.join(file, f"model_epoch_{args.epoch}.pth"))["state_dict"]
         )
     model = model.to(device)
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
     
-    trace_dir = "./traces/{}_{}_layer_traces.npy".format(
-        args.task_name, args.save_name
-    )
-    if os.path.exists(trace_dir):
-        max_traces = np.load(trace_dir)
-        sample_count = 1
-    else:
-        max_traces = []
-        sample_count = 0
-
+    # trace_dir = "./traces/{}_{}_layer_traces.npy".format(
+    #     args.task_name, args.save_name
+    # )
+    
+    max_traces = []
+    sample_count = 0
+    
+    hessian_traces = []
+    hessian_lambdas = []
     model.eval()
     for _, batch in enumerate(train_data_loader):
-        layer_traces = compute_hessian_traces(model, batch, device = device)
-        if sample_count == 0:
-            max_traces = layer_traces
-        else:
-            max_traces = np.maximum(max_traces, layer_traces)
-        logger.info("Current layer traces: {}".format(layer_traces))
-        logger.info("Traces: {}".format(max_traces))
-        logger.info("Traces sum: {}".format(np.sum(max_traces)))
-        np.save(trace_dir, max_traces)
+        batch = prepare_inputs(batch, device)
+        outputs = model(**batch)
+        loss = outputs.loss
+
+        layer_traces, _ = compute_hessian_traces(model, loss, device = device)
+        lambda_1, _ = compute_eigenvalue(model, loss, device=device, top_n=1) 
+
+        hessian_traces.append(layer_traces)
+        hessian_lambdas.append(np.array(lambda_1[0]))
+
+        print(np.mean(np.array(hessian_traces), axis=0), np.mean(np.array(hessian_traces), axis=0).sum())
+        print(np.mean(np.array(hessian_lambdas), axis=0), np.mean(np.array(hessian_lambdas), axis=0).sum())
+        logger.info("========== Batch Complete ==========")
+        # if sample_count == 0:
+        #     max_traces = layer_traces
+        # else:
+        #     max_traces = np.maximum(max_traces, layer_traces)
+        # logger.info("Current layer traces: {}".format(layer_traces))
+        # logger.info("Traces: {}".format(max_traces))
+        # logger.info("Traces sum: {}".format(np.sum(max_traces)))
+        # np.save(trace_dir, max_traces)
 
         sample_count += 1
         if sample_count > args.sample_size:
             break
+    print("Sum of trace: {}".format(np.mean(np.array(hessian_traces), axis=0).sum()))
+    print("Sum of top-1 eigenvalues: {}".format(np.mean(np.array(hessian_lambdas), axis=0).sum()))
 
 
 if __name__ == '__main__':
@@ -98,6 +112,7 @@ if __name__ == '__main__':
     args.add_argument("--lr_scheduler_type", type=SchedulerType, default="linear",
         choices=["linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"],
     )
+    args.add_argument("--epoch", type=int, default=1)
 
     args.add_argument("--checkpoint_dir", type=str, default="mrpc_False")
     args.add_argument("--checkpoint_name", type=str, default="model_best")
