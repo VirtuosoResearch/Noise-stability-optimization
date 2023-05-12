@@ -27,7 +27,7 @@ ours_std = np.array([
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,4)) 
+f, ax = plt.subplots(figsize=(6,4.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -65,6 +65,7 @@ ax.set_ylim([-0.05, 1.25])
 plt.yticks(np.arange(0., 1.21, 0.3),) # [r"$0$", "", r"$0.2$", "", r"$0.4$"]  
 plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25$", r"$30$"])
 
+ax.set_title(r'$\mathrm{CIFAR}$'+'-'+r'$\mathrm{100}$', fontsize=28)
 # plt.gca().invert_xaxis()
 
 plt.legend(fontsize=22)

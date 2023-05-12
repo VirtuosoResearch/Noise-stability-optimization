@@ -27,7 +27,7 @@ ours_std = np.array([
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,4)) 
+f, ax = plt.subplots(figsize=(6,4.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -64,10 +64,15 @@ ax.set_ylim([-0.05, 0.85])
 # ax.set_xlim([-0.5, 9.5]) 
 plt.yticks(np.arange(0., 0.81, 0.2), ) # [r"$0$", "", r"$0.2$", "", r"$0.4$"]
 plt.xticks(np.arange(0, 7, 1))
+ax.set_title(r'$\mathrm{MRPC}$', fontsize=28)
+
+#ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+#ax.yaxis.get_offset_text().set_fontsize(28)
+
 
 # plt.gca().invert_xaxis()
 
-plt.legend(fontsize=22)
+plt.legend(fontsize=22,loc=4)
 
 ax.grid(lw=0.8)
 plt.tight_layout()

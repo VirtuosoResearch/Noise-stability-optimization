@@ -27,7 +27,7 @@ ours_std = np.array([16.36364869, 69.62484957, 68.94553083, 75.81766236, 91.4061
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,4)) 
+f, ax = plt.subplots(figsize=(6,4.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -64,6 +64,10 @@ ax.set_ylim([-300, 9000])
 # ax.set_xlim([-0.5, 9.5]) 
 plt.yticks(np.arange(0, 8001, 2000))
 plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25$", r"$30$"])
+ax.set_title(r'$\mathrm{CIFAR}$'+'-'+r'$\mathrm{100}$', fontsize=28)
+
+ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+ax.yaxis.get_offset_text().set_fontsize(28)
 
 # plt.gca().invert_xaxis()
 
