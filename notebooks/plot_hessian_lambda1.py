@@ -34,9 +34,9 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 fig, ax = plt.subplots(figsize=(30,6))
 #rects8 = ax.bar(ind + shift * 0, l7, width, color='crimson', ecolor='white') # color='yellowgreen', ecolor='k', hatch="|"
-rects7 = ax.bar(ind + width * 1 + shift, l7, width, color='royalblue', ecolor='white') # color='yellowgreen', ecolor='k', hatch="|"
-rects6 = ax.bar(ind + width * 2 + shift*2, l6, width, color='orange', ecolor='white') # color='tomato', ecolor='k', hatch="x"
-rects3 = ax.bar(ind + width * 3 + shift*3, l3, width, color='forestgreen', ecolor='white')
+rects7 = ax.bar(ind + width * 1 + shift, l7, width, color='forestgreen', ecolor='white') # color='yellowgreen', ecolor='k', hatch="|"
+rects6 = ax.bar(ind + width * 2 + shift*2, l6, width, color='royalblue', ecolor='white') # color='tomato', ecolor='k', hatch="x"
+rects3 = ax.bar(ind + width * 3 + shift*3, l3, width, color='orange', ecolor='white')
 rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor='white')
 
 #ax.set_ylim([0.2, 400])
@@ -58,7 +58,7 @@ ax.legend(
     loc=2, fontsize=40, ncol=2)
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title('$\lambda_1[\mathbf{H}]$', fontsize=48, x=0.48, y=1.02)
+ax.set_title('$\lambda_1[\mathbf{H}]$', fontsize=48, x=0.483, y=1.02)
 
 ax.tick_params(axis='both', which='major', labelsize=40)
 ax.tick_params(axis='both', which='minor', labelsize=40)
