@@ -27,31 +27,31 @@ ours_std = np.array([16.36364869, 69.62484957, 68.94553083, 75.81766236, 91.4061
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,4)) 
+f, ax = plt.subplots(figsize=(6,5)) 
 
 x_axis = np.arange(len(sgd))
 
 for i in range(len(x_axis)):
-    scatter2 = ax.scatter(x_axis[i], sgd[i], s=80, marker="o", edgecolors = "none", facecolors='royalblue')
+    scatter2 = ax.scatter(x_axis[i], sgd[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 for i in range(len(x_axis)):
-    scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='forestgreen')
+    scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, sgd, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="red", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="royalblue", alpha=0.3
+    sgd - sgd_std, color="red", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="forestgreen", label=r"$\mathrm{NSO}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="red", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="forestgreen", alpha=0.3
+    ours - ours_std, color="red", alpha=0.3
 )
 
 ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 28)
@@ -64,6 +64,10 @@ ax.set_ylim([-300, 9000])
 # ax.set_xlim([-0.5, 9.5]) 
 plt.yticks(np.arange(0, 8001, 2000))
 plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25$", r"$30$"])
+ax.set_title(r'$\mathrm{ResNet}$'+'-'+r'$\mathrm{34}$', fontsize=28)
+
+ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+ax.yaxis.get_offset_text().set_fontsize(28)
 
 # plt.gca().invert_xaxis()
 
