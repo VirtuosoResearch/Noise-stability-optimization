@@ -151,7 +151,7 @@ class IndoorDataLoader(BaseDataLoader):
 
 
 class MessidorDataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", **kwargs):
+    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, test_split=0.0, num_workers=1, phase="train", **kwargs):
         training = phase == "train"
         if phase == "train":
             trsfm = transforms.Compose([
@@ -172,7 +172,7 @@ class MessidorDataLoader(BaseDataLoader):
 
         self.data_dir = data_dir
         self.dataset = Messidor2(self.data_dir, train=training, transform=trsfm)
-        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=0, num_workers=num_workers)
+        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=test_split, num_workers=num_workers)
 
     def split_validation(self):
         if self.valid_sampler is None:
@@ -188,10 +188,25 @@ class MessidorDataLoader(BaseDataLoader):
                     transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
                 ])
             return DataLoader(sampler=self.valid_sampler, **kwargs)
+        
+    def split_test(self):
+        if self.test_sampler is None:
+            return None
+        else:
+            kwargs = deepcopy(self.init_kwargs)
+            tmp_dataset = kwargs["dataset"]
+            tmp_dataset.transform = transforms.Compose([
+                    transforms.Resize(224 - 1, max_size=224),  #resizes (H,W) to (149, 224)
+                    transforms.Pad((0, 37, 0, 38)),
+                    transforms.Lambda(lambda x: x.convert("RGB")),
+                    transforms.ToTensor(),
+                    transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
+                ])
+            return DataLoader(sampler=self.test_sampler, **kwargs)
 
 class AptosDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", **kwargs):
+    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, test_split=0.0, num_workers=1, phase="train", **kwargs):
         training = phase == "train"
         if phase == "train":
             trsfm = transforms.Compose([
@@ -210,7 +225,7 @@ class AptosDataLoader(BaseDataLoader):
         
         self.data_dir = data_dir
         self.dataset = Aptos(self.data_dir, train=training, transform=trsfm)
-        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=0, num_workers=num_workers)
+        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=test_split, num_workers=num_workers)
 
     def split_validation(self):
         if self.valid_sampler is None:
@@ -225,10 +240,24 @@ class AptosDataLoader(BaseDataLoader):
                     transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
                 ])
             return DataLoader(sampler=self.valid_sampler, **kwargs)
+    
+    def split_test(self):
+        if self.test_sampler is None:
+            return None
+        else:
+            kwargs = deepcopy(self.init_kwargs)
+            tmp_dataset = kwargs["dataset"]
+            tmp_dataset.transform = transforms.Compose([
+                    transforms.Resize(224), 
+                    transforms.Lambda(lambda x: x.convert("RGB")),
+                    transforms.ToTensor(),
+                    transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
+                ])
+            return DataLoader(sampler=self.test_sampler, **kwargs)
 
 class JinchiDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", **kwargs):
+    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, test_split=0.0, num_workers=1, phase="train", **kwargs):
         training = phase == "train"
         if phase == "train":
             trsfm = transforms.Compose([
@@ -247,7 +276,7 @@ class JinchiDataLoader(BaseDataLoader):
         
         self.data_dir = data_dir
         self.dataset = Jinchi(self.data_dir, train=training, transform=trsfm)
-        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=0, num_workers=num_workers)
+        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=test_split, num_workers=num_workers)
 
     def split_validation(self):
         if self.valid_sampler is None:
@@ -262,3 +291,17 @@ class JinchiDataLoader(BaseDataLoader):
                     transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
                 ])
             return DataLoader(sampler=self.valid_sampler, **kwargs)
+        
+    def split_test(self):
+        if self.test_sampler is None:
+            return None
+        else:
+            kwargs = deepcopy(self.init_kwargs)
+            tmp_dataset = kwargs["dataset"]
+            tmp_dataset.transform = transforms.Compose([
+                    transforms.Resize((224, 224)), 
+                    transforms.Lambda(lambda x: x.convert("RGB")),
+                    transforms.ToTensor(),
+                    transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
+                ])
+            return DataLoader(sampler=self.test_sampler, **kwargs)

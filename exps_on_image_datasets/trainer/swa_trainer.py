@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-
+import os
 from .base_trainer import Trainer
 from torch.optim.swa_utils import AveragedModel, SWALR, update_bn
 
@@ -16,6 +16,7 @@ class SWATrainer(Trainer):
         self.swa_start = swa_start
         self.swa_lr = swa_lr
         self.swa_scheduler = SWALR(self.optimizer, swa_lr=self.swa_lr, anneal_epochs=5)
+        self.save_epoch = 1
 
     def _train_epoch(self, epoch):
         """

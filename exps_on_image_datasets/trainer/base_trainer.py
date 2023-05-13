@@ -66,6 +66,7 @@ class Trainer:
         self.train_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns])
         self.valid_metrics = MetricTracker('loss', *[m.__name__ for m in self.metric_ftns])
 
+        self.save_epoch = 5
         # self._save_checkpoint(0, name="model_epoch_0.pth")
 
 
@@ -185,7 +186,7 @@ class Trainer:
             if improved:
                 self._save_checkpoint(epoch)
 
-            if epoch % 5 == 0:
+            if epoch % self.save_epoch == 0:
                 self._save_checkpoint(epoch, name=f"model_epoch_{epoch}.pth")
 
     def test(self):
