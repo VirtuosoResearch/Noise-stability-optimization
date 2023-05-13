@@ -26,31 +26,31 @@ ours_std = np.array([ 32.72729738, 208.87454871, 206.83659249, 227.45298708,
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,4.5)) 
+f, ax = plt.subplots(figsize=(6,5)) 
 
 x_axis = np.arange(len(sgd))
 
 for i in range(len(x_axis)):
-    scatter2 = ax.scatter(x_axis[i], sgd[i], s=80, marker="o", edgecolors = "none", facecolors='royalblue')
+    scatter2 = ax.scatter(x_axis[i], sgd[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 for i in range(len(x_axis)):
-    scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='forestgreen')
+    scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, sgd, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="red", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="royalblue", alpha=0.3
+    sgd - sgd_std, color="red", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="forestgreen", label=r"$\mathrm{NSO}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="red", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="forestgreen", alpha=0.3
+    ours - ours_std, color="red", alpha=0.3
 )
 
 ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 28)
@@ -65,7 +65,7 @@ plt.yticks(np.arange(0, 14001, 3000))
 plt.xticks(np.arange(0, 7, 1))
 
 # plt.gca().invert_xaxis()
-ax.set_title(r'$\mathrm{MRPC}$', fontsize=28)
+ax.set_title(r'$\mathrm{BERT}$'+'-'+r'$\mathrm{Base}$', fontsize=30)
 
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(28)
@@ -73,7 +73,7 @@ ax.yaxis.get_offset_text().set_fontsize(28)
 
 plt.legend(fontsize=22)
 
-ax.grid(lw=0.8)
+ax.grid(lw=0.2)
 plt.tight_layout()
 plt.savefig(f"./bert_mrpc_hessian_traces.pdf", format="pdf", dpi=1200)
 plt.show()
