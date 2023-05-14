@@ -34,9 +34,9 @@ plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 fig, ax = plt.subplots(figsize=(30,6))
 #rects8 = ax.bar(ind + shift * 0, l7, width, color='crimson', ecolor='white') # color='yellowgreen', ecolor='k', hatch="|"
-rects7 = ax.bar(ind + width * 1 + shift, l7, width, color='royalblue', ecolor='white') # color='yellowgreen', ecolor='k', hatch="|"
-rects6 = ax.bar(ind + width * 2 + shift*2, l6, width, color='orange', ecolor='white') # color='tomato', ecolor='k', hatch="x"
-rects3 = ax.bar(ind + width * 3 + shift*3, l3, width, color='forestgreen', ecolor='white')
+rects7 = ax.bar(ind + width * 1 + shift, l7, width, color='forestgreen', ecolor='white') # color='yellowgreen', ecolor='k', hatch="|"
+rects6 = ax.bar(ind + width * 2 + shift*2, l6, width, color='royalblue', ecolor='white') # color='tomato', ecolor='k', hatch="x"
+rects3 = ax.bar(ind + width * 3 + shift*3, l3, width, color='orange', ecolor='white')
 rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor='white')
 
 #ax.set_ylim([0.2, 400])
@@ -45,7 +45,7 @@ ax.set_xticks(ind + width  + shift + 4)
 ax.set_xticklabels(msa_name_list, fontsize=40)
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(40)
-plt.yticks(np.arange(0, 12001, 2000))
+plt.yticks(np.arange(0, 12001, 3000))
 plt.ylim([0, 12001])
 
 plt.tick_params(axis='x')
