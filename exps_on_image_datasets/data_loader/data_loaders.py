@@ -1,3 +1,4 @@
+from torch.utils.data.dataloader import default_collate
 from torchvision import datasets, transforms
 from .base_data_loader import BaseDataLoader
 from .dataset_caltech import Caltech256
@@ -14,8 +15,10 @@ from .dataset_jinchi import Jinchi
 from .mini_domain_net import DomainNetDataLoader
 from .animal_attributes import AnimalAttributesDataLoader
 from .rand_augment import TransformFixMatch
+from .cxr_dataset import CXRDataset
 from copy import deepcopy
 from torch.utils.data import DataLoader
+import numpy as np
 
 class MatchChannel(object):
     def __call__(self, pic):
@@ -305,3 +308,30 @@ class JinchiDataLoader(BaseDataLoader):
                     transforms.Normalize([0.2859, 0.1341, 0.0471], [0.3263, 0.1568, 0.0613]),
                 ])
             return DataLoader(sampler=self.test_sampler, **kwargs)
+        
+class CXRDataLoader(BaseDataLoader):
+    mean = np.array([0.485, 0.456, 0.406])
+    std = np.array([0.229, 0.224, 0.225])
+
+    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, test_split=0.0, num_workers=1, phase="train", **kwargs):
+        
+        if phase == "train":
+            trsfm = transforms.Compose([
+                    transforms.RandomHorizontalFlip(),
+                    transforms.Scale(224),
+                    # because scale doesn't always give 224 x 224, this ensures 224 x 224
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor(),
+                    transforms.Normalize(CXRDataLoader.mean, CXRDataLoader.std)
+                ])
+        elif phase == "val" or phase == "test":
+            trsfm = transforms.Compose([
+                transforms.Scale(224),
+                transforms.CenterCrop(224),
+                transforms.ToTensor(),
+                transforms.Normalize(CXRDataLoader.mean, CXRDataLoader.std)
+            ])
+        
+        self.data_dir = data_dir
+        self.dataset = CXRDataset(self.data_dir, fold=phase, transform=trsfm)
+        super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=test_split, num_workers=num_workers)

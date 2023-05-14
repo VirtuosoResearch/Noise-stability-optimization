@@ -31,7 +31,9 @@ def main(config, args):
         train_data_loader = config.init_obj('data_loader', module_data, idx_start = 0, img_num = 30, phase = "train")
         valid_data_loader = config.init_obj('data_loader', module_data, idx_start = 30, img_num = 20, phase = "val")
         test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test")
-    elif config["data_loader"]["type"] == "AircraftsDataLoader" or config["data_loader"]["type"] == "DomainNetDataLoader":
+    elif config["data_loader"]["type"] == "AircraftsDataLoader" \
+        or config["data_loader"]["type"] == "DomainNetDataLoader" \
+        or config["data_loader"]["type"] == "CXRDataLoader" :
         train_data_loader = config.init_obj('data_loader', module_data, phase = "train")
         valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
         test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
@@ -56,9 +58,9 @@ def main(config, args):
     elif config["data_loader"]["type"] == "MessidorDataLoader" or \
         config["data_loader"]["type"] == "AptosDataLoader" or \
         config["data_loader"]["type"] == "JinchiDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.2, phase = "train")
+        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.2, test_split=0.2, phase = "train")
         valid_data_loader = train_data_loader.split_validation()
-        test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
+        test_data_loader = train_data_loader.split_test()
 
     if args.synthetic_noise:
         if config["data_loader"]["type"] == "DomainNetDataLoader" or config["data_loader"]["type"] == "AnimalAttributesDataLoader":
@@ -79,6 +81,11 @@ def main(config, args):
         train_data_len = len(train_data_loader.sampler)
         train_data_loader.sampler.indices = train_data_loader.sampler.indices[:int(train_data_len*args.data_frac)]
         train_labels_old = None # 
+        if args.downsample_test:
+            test_data_len = len(test_data_loader.sampler)
+            val_data_len = len(valid_data_loader.sampler)
+            test_data_loader.sampler.indices = test_data_loader.sampler.indices[:int(test_data_len*args.data_frac)]
+            valid_data_loader.sampler.indices = valid_data_loader.sampler.indices[:int(val_data_len*args.data_frac)]
     logger.info("Train Size: {} Valid Size: {} Test Size: {}".format(
         len(train_data_loader.sampler), 
         len(valid_data_loader.sampler), 
@@ -120,7 +127,7 @@ def main(config, args):
 
         if args.train_ls:
             checkpoint_dir = os.path.join(
-            "./saved", 
+            "./saved_hessians", 
             "{}_{}_ls_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.ls_alpha))
             trainer = LabelSmoothTrainer(model, criterion, metrics, optimizer,
                         config=config,
@@ -133,7 +140,7 @@ def main(config, args):
                         alpha=args.ls_alpha)
         elif args.train_mixup:
             checkpoint_dir = os.path.join(
-            "./saved", 
+            "./saved_hessians", 
             "{}_{}_mixup_{}".format(config["arch"]["type"], config["data_loader"]["type"],  args.mixup_alpha))
             trainer = MixupTrainer(model, criterion, metrics, optimizer,
                         config=config,
@@ -146,7 +153,7 @@ def main(config, args):
                         alpha=args.mixup_alpha)
         elif args.train_swa:
             checkpoint_dir = os.path.join(
-            "./saved", 
+            "./saved_hessians", 
             "{}_{}_swa_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.swa_epoch, args.swa_lr))
             trainer = SWATrainer(model, criterion, metrics, optimizer,
                         config=config,
@@ -161,10 +168,10 @@ def main(config, args):
         elif args.train_sam:
             checkpoint_dir = os.path.join(
             "./saved_hessians", 
-            "{}_{}_sam_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.sam_rho))
+            "{}_{}_sam_{}_ada_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.sam_rho, args.sam_adaptive))
             base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
             optimizer = SAM(model.parameters(), base_optimizer, rho=args.sam_rho, 
-                        adaptive=False, **dict(config["optimizer"]["args"]))
+                            adaptive=args.sam_adaptive, **dict(config["optimizer"]["args"]))
             lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
             trainer = SAMTrainer(model, criterion, metrics, optimizer,
                             config=config,
@@ -192,9 +199,32 @@ def main(config, args):
                             nsm_lam=args.nsm_lam,
                             num_perturbs=args.num_perturbs,
                             use_neg=args.use_neg)
+        elif args.train_nsmswa:
+            checkpoint_dir = os.path.join(
+                "./saved_hessians",
+                "{}_{}_nsm_{}_{}_{}_{}_swa_{}_{}".format(
+                config["arch"]["type"], config["data_loader"]["type"], 
+                args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg,
+                args.swa_epoch, args.swa_lr))
+            base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
+            optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, **dict(config["optimizer"]["args"]))
+            lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
+            trainer = NSMSWATrainer(model, criterion, metrics, optimizer,
+                            config=config,
+                            device=device,
+                            train_data_loader=train_data_loader,
+                            valid_data_loader=valid_data_loader,
+                            test_data_loader=test_data_loader,
+                            lr_scheduler=lr_scheduler,
+                            checkpoint_dir=checkpoint_dir,
+                            nsm_lam=args.nsm_lam,
+                            num_perturbs=args.num_perturbs,
+                            use_neg=args.use_neg,
+                            swa_start=args.swa_epoch,
+                            swa_lr=args.swa_lr)
         else:
             checkpoint_dir = os.path.join(
-            "./saved_label_noise", 
+            "./saved_hessians", 
             "{}_{}_{}_{}_{:.4f}_{:.4f}_run_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
                                     config["reg_method"], config["reg_norm"],
                                     config["reg_extractor"], config["reg_predictor"], run))
@@ -239,6 +269,7 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
     args.add_argument('--runs', type=int, default=3)
     args.add_argument('--data_frac', type=float, default=1.0)
+    args.add_argument('--downsample_test', action="store_true")
     
     args.add_argument('--is_vit', action="store_true")
     args.add_argument('--img_size', type=int, default=224)
@@ -271,12 +302,15 @@ if __name__ == '__main__':
 
     args.add_argument('--train_sam', action="store_true")
     args.add_argument('--sam_rho', type=float, default=0.05)
+    args.add_argument('--sam_adaptive', action="store_true")
 
     args.add_argument('--train_nsm', action="store_true")
     args.add_argument('--use_neg', action="store_true")
     args.add_argument('--nsm_sigma', type=float, default=0.01)
     args.add_argument('--num_perturbs', type=int, default=1)
     args.add_argument('--nsm_lam', type=float, default=0.5)
+
+    args.add_argument('--train_nsmswa', action="store_true")
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')

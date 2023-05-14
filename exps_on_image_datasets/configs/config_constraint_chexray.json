@@ -1,0 +1,56 @@
+{
+    "name": "Medical_Image",
+    "n_gpu": 1,
+
+    "reg_method": "none",
+    "reg_norm": "none",
+    "reg_extractor": 1,
+    "reg_predictor": 1,
+    "scale_factor": 1,
+
+    "arch": {
+        "type": "ResNet101",
+        "args": {
+            "n_classes": 14,
+            "return_softmax": false
+        }
+    },
+    "data_loader": {
+        "type": "CXRDataLoader",
+        "args":{
+            "data_dir": "./data/chexray/",
+            "batch_size": 64,
+            "shuffle": true,
+            "num_workers": 2
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.0001,
+            "weight_decay": 0,
+            "amsgrad": true
+        }
+    },
+    "loss": "bce_loss",
+    "metrics": [
+        "roc_auc"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 10,
+            "gamma": 0.1
+        }
+    },
+    "trainer": {
+        "epochs": 30,
+
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 2,
+        
+        "monitor": "max val_roc_auc",
+        "early_stop": 30
+    }
+}

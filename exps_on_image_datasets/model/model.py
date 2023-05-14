@@ -205,7 +205,7 @@ class ResNet50(nn.Module):
     
 class ResNet34(nn.Module):
 
-    def __init__(self, pretrained = True, n_classes = 10):
+    def __init__(self, pretrained = True, n_classes = 10, return_softmax = True):
         super(ResNet34, self).__init__()
         self.feature_extractor = models.resnet34(pretrained = pretrained)
 
@@ -213,6 +213,7 @@ class ResNet34(nn.Module):
         self.out_features = n_classes
         self.pred_head = nn.Linear(self.in_features, self.out_features)
         self.feature_extractor.fc = IdentityModule()
+        self.return_softmax = return_softmax
     
     def reset_parameters(self, state_dict = None):
         # Reload source dict
@@ -223,7 +224,10 @@ class ResNet34(nn.Module):
     def forward(self, x):
         x = self.feature_extractor(x)
         x = self.pred_head(x)
-        return F.log_softmax(x, dim=1)
+        if self.return_softmax:
+            return F.log_softmax(x, dim=1)
+        else:
+            return x
     
     
 class EfficientNetB7(nn.Module):

@@ -222,7 +222,7 @@ class Trainer:
         })
         self.logger.info(log)
 
-        return log["accuracy"]
+        return log[self.metric_ftns[0].__name__]
 
     def _save_checkpoint(self, epoch, name = 'model_best.pth'):
         """

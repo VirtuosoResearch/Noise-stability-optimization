@@ -180,4 +180,4 @@ class NSMSWATrainer(Trainer):
         torch.save(state, best_path)
         self.logger.info("Saving weight averaging model: swa_model.pth ...")
 
-        return log["accuracy"]
+        return log[self.metric_ftns[0].__name__]

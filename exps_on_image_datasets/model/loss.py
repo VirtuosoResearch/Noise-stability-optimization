@@ -5,6 +5,10 @@ import torch.nn.functional as F
 def nll_loss(output, target):
     return F.nll_loss(output, target)
 
+def bce_loss(output, target):
+    # print(target.dtype)
+    return F.binary_cross_entropy_with_logits(output, target.float())
+
 def custom_kl_div(prediction, target):
     output_pos = target * (target.clamp(min=1e-7).log() - prediction)
     zeros = torch.zeros_like(output_pos)
