@@ -39,18 +39,18 @@ for i in range(len(x_axis)):
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="red", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="red", alpha=0.3
+    sgd - sgd_std, color="royalblue", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="red", label=r"$\mathrm{NSO}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="red", alpha=0.3
+    ours - ours_std, color="royalblue", alpha=0.3
 )
 
 ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 28)

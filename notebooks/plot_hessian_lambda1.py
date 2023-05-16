@@ -67,8 +67,7 @@ ax.legend(
     loc=2, fontsize=40, ncol=2)
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title('$\lambda_1[\mathbf{H}]$', fontsize=48, x=0.483, y=1.02)
-
+ax.set_title(r'$\mathrm{Largest~Eigenvalue}$', fontsize=48, x=0.483, y=1.02)
 ax.tick_params(axis='both', which='major', labelsize=40)
 ax.tick_params(axis='both', which='minor', labelsize=40)
 

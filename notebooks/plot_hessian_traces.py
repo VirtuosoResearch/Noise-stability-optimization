@@ -72,7 +72,7 @@ ax.legend(
 
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title(r'$\textup{Tr}[\mathbf{H}]$', fontsize=48, x=0.474, y=1.02)
+ax.set_title(r'$\mathrm{Hessian~Trace}$', fontsize=48, x=0.474, y=1.02)
 
 ax.tick_params(axis='both', which='major', labelsize=40)
 ax.tick_params(axis='both', which='minor', labelsize=40)
