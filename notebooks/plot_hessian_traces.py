@@ -66,7 +66,7 @@ plt.tick_params(axis='x')
 #    loc=1, fontsize=28, ncol=3)
 ax.legend(
     (rects7[0], rects6[0], rects3[0], rects2[0]), 
-    (r'$\mathrm{NSO}~(k=2)$', r'$\mathrm{NSO}~(k=1)$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
+    (r'$\mathrm{NSO}~(C=4)$', r'$\mathrm{NSO}~(C=2)$', r'$\mathrm{SAM}~(C=2)$', r'$\mathrm{SGD}~(C=1)$'), 
     loc=2, fontsize=40, ncol=2)
 
 
