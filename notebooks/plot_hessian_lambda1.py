@@ -63,12 +63,11 @@ plt.tick_params(axis='x')
 
 ax.legend(
     (rects7[0], rects6[0], rects3[0], rects2[0]), 
-    (r'$\mathrm{NSO}~(k=2)$', r'$\mathrm{NSO}~(k=1)$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
+    (r'$\mathrm{NSO}~(C=4)$', r'$\mathrm{NSO}~(C=2)$', r'$\mathrm{SAM}~(C=2)$', r'$\mathrm{SGD}~(C=1)$'), 
     loc=2, fontsize=40, ncol=2)
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title('$\lambda_1[\mathbf{H}]$', fontsize=48, x=0.483, y=1.02)
-
+ax.set_title(r'$\mathrm{Largest~Eigenvalue}$', fontsize=48, x=0.483, y=1.02)
 ax.tick_params(axis='both', which='major', labelsize=40)
 ax.tick_params(axis='both', which='minor', labelsize=40)
 
