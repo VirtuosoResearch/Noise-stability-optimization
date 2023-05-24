@@ -229,7 +229,58 @@ class ResNet34(nn.Module):
         else:
             return x
     
+class ViTB16(nn.Module):
+
+    def __init__(self, pretrained = True, n_classes = 10, return_softmax = True):
+        super(ViTB16, self).__init__()
+        self.feature_extractor = models.vit_b_16(weights=models.ViT_B_16_Weights)
+
+        self.in_features = self.feature_extractor.heads[0].in_features
+        self.out_features = n_classes
+        self.pred_head = nn.Linear(self.in_features, self.out_features)
+        self.feature_extractor.heads = IdentityModule()
+        self.return_softmax = return_softmax
     
+    def reset_parameters(self, state_dict = None):
+        # Reload source dict
+        if state_dict is not None: 
+            self.load_state_dict(state_dict)
+        self.pred_head.reset_parameters()
+
+    def forward(self, x):
+        x = self.feature_extractor(x)
+        x = self.pred_head(x)
+        if self.return_softmax:
+            return F.log_softmax(x, dim=1)
+        else:
+            return x
+        
+class ViTL16(nn.Module):
+
+    def __init__(self, pretrained = True, n_classes = 10, return_softmax = True):
+        super(ViTL16, self).__init__()
+        self.feature_extractor = models.vit_l_16(weights=models.ViT_L_16_Weights)
+
+        self.in_features = self.feature_extractor.heads[0].in_features
+        self.out_features = n_classes
+        self.pred_head = nn.Linear(self.in_features, self.out_features)
+        self.feature_extractor.heads = IdentityModule()
+        self.return_softmax = return_softmax
+    
+    def reset_parameters(self, state_dict = None):
+        # Reload source dict
+        if state_dict is not None: 
+            self.load_state_dict(state_dict)
+        self.pred_head.reset_parameters()
+
+    def forward(self, x):
+        x = self.feature_extractor(x)
+        x = self.pred_head(x)
+        if self.return_softmax:
+            return F.log_softmax(x, dim=1)
+        else:
+            return x
+
 class EfficientNetB7(nn.Module):
 
     def __init__(self, pretrained = True, n_classes = 10):

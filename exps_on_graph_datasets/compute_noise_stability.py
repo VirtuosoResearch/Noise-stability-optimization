@@ -167,12 +167,15 @@ def main(args):
     device = torch.device(f"cuda:{args.device}" if args.device != "cpu" else "cpu")
     
     data_loader = train_loader
-    # model.load_state_dict(
-    #             torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}" + ".pth")
-    #         )
-    # model = model.to(device)
-    # print(compute_loss(model, train_loader, device, batch_num=10000))
-    # print(compute_loss(model, test_loader, device, batch_num=10000))
+    model.load_state_dict(
+                torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}_epoch_{args.epoch}" + ".pth")
+            )
+    model = model.to(device)
+
+    _, train_loss = compute_loss(model, train_loader, device, batch_num=10000)
+    _, test_loss = compute_loss(model, test_loader, device, batch_num=10000)
+    print("Training loss: {}".format(train_loss))
+    print("Test loss: {}".format(test_loss))
     if args.compute_hessian_trace:
         traces = []
         sample_count = 0
@@ -180,7 +183,7 @@ def main(args):
         model.eval()
         for data in data_loader:
             model.load_state_dict(
-                torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}" + ".pth")
+                torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}_epoch_{args.epoch}" + ".pth")
             )
             model = model.to(device)
             data = data.to(device)
@@ -202,6 +205,29 @@ def main(args):
             sample_count += 1
             if sample_count > args.sample_size:
                 break
+        
+        start_state_dict = torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}_epoch_0" + ".pth", 
+                                      map_location=device)
+        state_dict = torch.load(f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{args.fold_idx}_run_{args.run}_epoch_{args.epoch}" + ".pth",
+                                map_location=device)
+
+        weights_1 = []; weights_2 = []
+        for key in state_dict.keys():
+            if "weight" in key and "bn" not in key:
+                weights_1.append(state_dict[key] - start_state_dict[key])
+                weights_2.append(state_dict[key])
+
+        norms_1 = (np.array([torch.norm(w).cpu().item() for w in weights_1]))**2
+        norms_2 = (np.array([torch.norm(w).cpu().item() for w in weights_2]))**2
+        print("Norms: {}".format(norms_1))
+        print("Norms: {}".format(norms_2))
+        norms = np.minimum(norms_1, norms_2)
+
+        train_num = len(train_loader.dataset)
+        bound = max_loss*np.math.sqrt((max_traces.sum()*norms.sum())/train_num)
+
+        print("Empirical gap: {}".format(test_loss-train_loss))
+        print("Bound: {}".format(bound))
     else:
         ''' Measure noise stability '''
         perturbs = np.arange(0.04, 0.061, 0.001)
@@ -216,6 +242,7 @@ def main(args):
                 perturb, np.mean(diff_losses), np.std(diff_losses)
             ))  
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='IMDB-BINARY')
@@ -226,6 +253,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size', type=int, default=4)
 
     parser.add_argument('--sample_size', type=int, default=250)
+    parser.add_argument('--epoch', type=int, default=0)
 
     ''' Model '''
     parser.add_argument('--model', type=str, default="gcn")

@@ -154,6 +154,10 @@ def main(args):
         
             tmp_train_losses = []; tmp_test_losses = []
             tmp_train_acces = []; tmp_test_acces = []
+
+            checkpoint_dir = f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{fold_idx}_run_{run}_epoch_0" 
+            torch.save(model.state_dict(), 
+                checkpoint_dir + ".pth")
             for epoch in range(1, args.epochs+1):
                 train(model, train_loader, optimizer, lr_scheduler, device)
                 
@@ -174,9 +178,10 @@ def main(args):
                     tmp_train_acces.append(train_acc); tmp_test_acces.append(test_acc)
                 
                 ''' Save checkpoint '''
-                checkpoint_dir = f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{fold_idx}_run_{run}" 
-                torch.save(model.state_dict(), 
-                    checkpoint_dir + ".pth")
+                if epoch % 5 == 0:
+                    checkpoint_dir = f"./saved/{args.dataset}_{args.model}_layer_{args.num_layers}_aggr_{args.aggr}_fold_{fold_idx}_run_{run}_epoch_{epoch}" 
+                    torch.save(model.state_dict(), 
+                        checkpoint_dir + ".pth")
 
             train_losses_run.append(np.array(tmp_train_losses)); test_losses_run.append(np.array(tmp_test_losses))
             train_accs_run.append(np.array(tmp_train_acces)); test_accs_run.append(np.array(tmp_test_acces))

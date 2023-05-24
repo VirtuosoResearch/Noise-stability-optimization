@@ -15,7 +15,7 @@
         }
     },
     "data_loader": {
-        "type": "AptosDataLoader",
+        "type": "MessidorDataLoader",
         "args":{
             "data_dir": "./data/",
             "batch_size": 32,
@@ -24,11 +24,11 @@
         }
     },
     "optimizer": {
-        "type": "Adam",
+        "type": "SGD",
         "args":{
-            "lr": 0.0001,
-            "weight_decay": 0,
-            "amsgrad": true
+            "lr": 0.01,
+            "momentum": 0.9,
+            "weight_decay": 0
         }
     },
     "loss": "nll_loss",

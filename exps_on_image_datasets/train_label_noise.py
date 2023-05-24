@@ -74,7 +74,7 @@ def main(config, args):
             train_labels_old = train_data_loader.dataset.true_labels[train_data_loader.sampler.indices]
         else:
             train_labels_old = None
-    
+
     # If small data, shrink training data size
     assert 0 < args.data_frac <= 1
     if args.data_frac < 1:
