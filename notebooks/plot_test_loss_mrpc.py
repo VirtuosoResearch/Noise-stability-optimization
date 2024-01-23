@@ -22,7 +22,7 @@ ours_std = np.array([0.00909092, 0.00835498, 0.00827346, 0.00909812, 0.01096873,
        0.00839749, 0.00657807])
 
 
-f, ax = plt.subplots(figsize=(6,5)) 
+f, ax = plt.subplots(figsize=(6,4.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -33,33 +33,32 @@ for i in range(len(x_axis)):
     scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 
-
-plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="royalblue", alpha=0.2
+    sgd - sgd_std, color="royalblue", alpha=0.1
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{NSO}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="royalblue", alpha=0.2
+    ours - ours_std, color="royalblue", alpha=0.1
 )
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 28)
-ax.set_ylabel(r"$\mathrm{Test~loss}$", fontsize = 28)
-ax.tick_params(labelsize=28)
+ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 42)
+ax.set_ylabel(r"$\mathrm{Test~loss}$", fontsize = 42)
+ax.tick_params(labelsize=42)
 ax.set_ylim([0.57, 1.03]) 
-
+plt.yticks(np.arange(0.6, 1.1, 0.2))
 plt.xticks(np.arange(0, 7, 1))
 
 # plt.gca().invert_xaxis()
-ax.set_title(r'$\mathrm{BERT}$'+'-'+r'$\mathrm{Base}$', fontsize=30)
+# ax.set_title(r'$\mathrm{BERT}$'+'-'+r'$\mathrm{Base}$', fontsize=42)
 
 
-plt.legend(fontsize=22, loc="upper right")
+plt.legend(fontsize=30, loc="upper right")
 
 ax.grid(lw=0.8)
 plt.tight_layout()
