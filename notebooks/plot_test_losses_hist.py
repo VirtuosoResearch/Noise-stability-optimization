@@ -51,10 +51,10 @@ ax.yaxis.get_offset_text().set_fontsize(40)
 plt.tick_params(axis='x')
 
 
-ax.legend(
-    (rects6[0], rects3[0], rects2[0]), 
-    (r'$\mathrm{NSO}$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
-    loc=1, fontsize=40, ncol=3)
+# ax.legend(
+#     (rects6[0], rects3[0], rects2[0]), 
+#     (r'$\mathrm{NSO}$', r'$\mathrm{SAM}$', r'$\mathrm{WP-SGD}$'), 
+#     loc=1, fontsize=40, ncol=3)
 
 ax.yaxis.grid(True, lw=0.4)
 ax.set_title(r'$\mathrm{Test~loss}$', fontsize=48, x=0.474, y=1.02)
