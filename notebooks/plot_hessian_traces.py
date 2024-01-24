@@ -53,7 +53,7 @@ rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor=
 #ax.set_ylim([0.2, 400])
 #ax.set_ylabel('Trace value', fontsize=36)
 ax.set_xticks(ind + width  + shift + 5.5)
-ax.set_xticklabels(msa_name_list, fontsize=40)
+ax.set_xticklabels(msa_name_list, fontsize=52)
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(40)
 plt.yticks(np.arange(0, 12001, 3000))
@@ -76,8 +76,8 @@ ax.legend(
 ax.yaxis.grid(True, lw=0.4)
 ax.set_title(r'$\mathrm{Trace}$', fontsize=48, x=0.474, y=1.02)
 
-ax.tick_params(axis='both', which='major', labelsize=40)
-ax.tick_params(axis='both', which='minor', labelsize=40)
+ax.tick_params(axis='both', which='major', labelsize=52)
+ax.tick_params(axis='both', which='minor', labelsize=52)
 
 plt.tight_layout()
 plt.savefig('comparsion_hessian_traces.pdf', format='pdf', dpi=100)

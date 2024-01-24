@@ -38,7 +38,7 @@ rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor=
 
 ax.set_ylim([0, 0.87])
 ax.set_yticks(np.arange(0, 0.85, 0.2))
-ax.set_ylabel('Test loss', fontsize=52)
+# ax.set_ylabel('Test loss', fontsize=52)
 ax.set_xticks(np.array([10.3, 33.3, 58.3, 81.3, 107.3]))# ind + width  + shift + 7.5
 ax.set_xticklabels(msa_name_list, fontsize=52)
 
