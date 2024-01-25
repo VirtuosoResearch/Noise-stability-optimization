@@ -23,7 +23,7 @@ ours_std = np.array([0.005874, 0.005148, 0.005184, 0.004596, 0.004896, 0.004656,
        0.00516 ])
 
 
-f, ax = plt.subplots(figsize=(6,4.5)) 
+f, ax = plt.subplots(figsize=(6,7)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -41,7 +41,7 @@ plt.fill_between(
     sgd - sgd_std, color="royalblue", alpha=0.1
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{NSO}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{Alg.~1}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
@@ -50,9 +50,9 @@ plt.fill_between(
 
 
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 42)
-ax.set_ylabel(r"$\mathrm{Test~loss}$", fontsize = 42)
-ax.tick_params(labelsize=42)
+ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
+#ax.set_ylabel(r"$\mathrm{Test~loss}$", fontsize = 36)
+ax.tick_params(labelsize=36)
 # ax.set_ylim([-300, 9000]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
 
@@ -63,8 +63,8 @@ plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25
 # ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 # ax.yaxis.get_offset_text().set_fontsize(28)
 
-
-plt.legend(fontsize=30)
+ax.set_title(r'$\mathrm{Test~Loss}$', fontsize=36)
+plt.legend(fontsize=36)
 
 ax.grid(lw=0.8)
 plt.tight_layout()
