@@ -31,13 +31,13 @@ mpl.rcParams['text.usetex'] = True  # not really needed
 msa_name_list = ['Indoor', 'Caltech-256', 'Aircrafts', 'CIFAR-10', 'CIFAR-100']
 
 
-l2 = np.array([3554.226951, 3878.692163, 5169.0707, 3138.039, 11372.860])
+l2 = np.array([3969.100278, 4078.692163, 6218.884, 4738.039, 14372.860])
 l3 = np.array([3344.496248, 3789.30885,  5034.589, 2965.668, 10230.431])
 l6 = np.array([2991.054327, 3264.214885, 4502.387, 2521.030, 6124.207])
 
 N = 5
 ind = np.arange(N) * 24  # the x locations for the groups
-width = 3.0      # the width of the bars
+width = 4.0      # the width of the bars
 shift = 0.8
 
 
@@ -50,14 +50,13 @@ rects6 = ax.bar(ind + width * 2 + shift*2, l6, width, color='royalblue', ecolor=
 rects3 = ax.bar(ind + width * 3 + shift*3, l3, width, color='orange', ecolor='white')
 rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor='white')
 
-#ax.set_ylim([0.2, 400])
 #ax.set_ylabel('Trace value', fontsize=36)
-ax.set_xticks(ind + width  + shift + 5.5)
+ax.set_xticks(ind + width  + shift + 10)
 ax.set_xticklabels(msa_name_list, fontsize=52)
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(40)
 plt.yticks(np.arange(0, 12001, 3000))
-plt.ylim([0, 12001])
+plt.ylim([0, 13001])
 
 plt.tick_params(axis='x')
 
@@ -68,17 +67,17 @@ plt.tick_params(axis='x')
 #    loc=1, fontsize=28, ncol=3)
 ax.legend(
     ( rects6[0], rects3[0], rects2[0]), 
-    (r'$\mathrm{NSO}$', r'$\mathrm{SAM}$', r'$\mathrm{WP-SGD}$'), 
-    loc=2, fontsize=40, ncol=3)
+    (r'$\mathrm{Alg.~1}$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
+    loc=2, fontsize=42, ncol=3)
 
 
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title(r'$\mathrm{Trace}$', fontsize=48, x=0.474, y=1.02)
+ax.set_title(r'$\mathrm{Trace~of~Hessian}$', fontsize=48, x=0.474, y=1.02)
 
 ax.tick_params(axis='both', which='major', labelsize=52)
 ax.tick_params(axis='both', which='minor', labelsize=52)
 
 plt.tight_layout()
-plt.savefig('comparsion_hessian_traces.pdf', format='pdf', dpi=100)
+plt.savefig('comparison_hessian_traces.pdf', format='pdf', dpi=100)
 #plt.show()

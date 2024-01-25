@@ -39,7 +39,7 @@ rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor=
 ax.set_ylim([0, 0.87])
 ax.set_yticks(np.arange(0, 0.85, 0.2))
 # ax.set_ylabel('Test loss', fontsize=52)
-ax.set_xticks(np.array([10.3, 33.3, 58.3, 81.3, 107.3]))# ind + width  + shift + 7.5
+ax.set_xticks(ind + width  + shift + 10)# 
 ax.set_xticklabels(msa_name_list, fontsize=52)
 
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
@@ -57,7 +57,7 @@ plt.tick_params(axis='x')
 #     loc=1, fontsize=40, ncol=3)
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title(r'$\mathrm{Test~loss}$', fontsize=48, x=0.474, y=1.02)
+ax.set_title(r'$\mathrm{Test~Loss}$', fontsize=48, x=0.474, y=1.02)
 
 
 ax.tick_params(axis='both', which='major', labelsize=52)
