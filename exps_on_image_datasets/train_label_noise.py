@@ -16,12 +16,7 @@ from model.modeling_vit import VisionTransformer, CONFIGS
 from utils.dual_t import get_transition_matrices, compose_T_matrices
 from utils.sam import SAM
 from utils.nsm import NSM
-
-'''
-TODO:
-    - Add the algorithms
-    - Test which datasets work
-'''
+from utils.rsam import RSAM 
 
 def main(config, args):
     logger = config.get_logger('train')
@@ -181,10 +176,26 @@ def main(config, args):
                             test_data_loader=test_data_loader,
                             lr_scheduler=lr_scheduler,
                             checkpoint_dir=checkpoint_dir)
+        elif args.train_rsam:
+            checkpoint_dir = os.path.join(
+            "./saved", 
+            "{}_{}_rsam_{}_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.rsam_rho, args.rsam_sigma, args.rsam_lam))
+            base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
+            optimizer = RSAM(model.parameters(), base_optimizer, rho=args.rsam_rho, 
+                             sigma=args.rsam_sigma, lam=args.rsam_lam, **dict(config["optimizer"]["args"]))
+            lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
+            trainer = RSAMTrainer(model, criterion, metrics, optimizer,
+                            config=config,
+                            device=device,
+                            train_data_loader=train_data_loader,
+                            valid_data_loader=valid_data_loader,
+                            test_data_loader=test_data_loader,
+                            lr_scheduler=lr_scheduler,
+                            checkpoint_dir=checkpoint_dir)
         elif args.train_nsm:
             checkpoint_dir = os.path.join(
-                "./saved_hessians",
-                "{}_{}_nsm_{}_{}_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg))
+                "./saved",
+                "{}_{}_nsm_{}_{}_{}_{}_epochs_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg, args.epochs))
             base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
             optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, **dict(config["optimizer"]["args"]))
             lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
@@ -303,6 +314,11 @@ if __name__ == '__main__':
     args.add_argument('--train_sam', action="store_true")
     args.add_argument('--sam_rho', type=float, default=0.05)
     args.add_argument('--sam_adaptive', action="store_true")
+
+    args.add_argument('--train_rsam', action="store_true")
+    args.add_argument('--rsam_rho', type=float, default=0.05)
+    args.add_argument('--rsam_sigma', type=float, default=0.01)
+    args.add_argument('--rsam_lam', type=float, default=1.0)
 
     args.add_argument('--train_nsm', action="store_true")
     args.add_argument('--use_neg', action="store_true")
