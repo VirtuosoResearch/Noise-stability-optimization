@@ -6,3 +6,4 @@ from .nsm_trainer import NSMTrainer, NSMSWATrainer
 from .sam_trainer import SAMTrainer
 from .swa_trainer import SWATrainer
 from .rsam_trainer import RSAMTrainer
+from .bsam_trainer import BSAMTrainer

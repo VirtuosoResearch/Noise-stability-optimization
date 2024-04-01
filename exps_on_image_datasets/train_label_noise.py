@@ -17,6 +17,7 @@ from utils.dual_t import get_transition_matrices, compose_T_matrices
 from utils.sam import SAM
 from utils.nsm import NSM
 from utils.rsam import RSAM 
+from utils.bsam import BSAM
 
 def main(config, args):
     logger = config.get_logger('train')
@@ -192,6 +193,21 @@ def main(config, args):
                             test_data_loader=test_data_loader,
                             lr_scheduler=lr_scheduler,
                             checkpoint_dir=checkpoint_dir)
+        elif args.train_bsam:
+            checkpoint_dir = os.path.join(
+            "./saved", 
+            "{}_{}_bsam_{}_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.bsam_rho, args.bsam_sigma))
+            optimizer = BSAM(model.parameters(), rho=args.bsam_rho, sigma=args.bsam_sigma,
+                             **dict(config["optimizer"]["args"]))
+            lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
+            trainer = BSAMTrainer(model, criterion, metrics, optimizer,
+                            config=config,
+                            device=device,
+                            train_data_loader=train_data_loader,
+                            valid_data_loader=valid_data_loader,
+                            test_data_loader=test_data_loader,
+                            lr_scheduler=lr_scheduler,
+                            checkpoint_dir=checkpoint_dir)
         elif args.train_nsm:
             checkpoint_dir = os.path.join(
                 "./saved",
@@ -319,6 +335,10 @@ if __name__ == '__main__':
     args.add_argument('--rsam_rho', type=float, default=0.05)
     args.add_argument('--rsam_sigma', type=float, default=0.01)
     args.add_argument('--rsam_lam', type=float, default=1.0)
+
+    args.add_argument('--train_bsam', action="store_true")
+    args.add_argument('--bsam_rho', type=float, default=0.05)
+    args.add_argument('--bsam_sigma', type=float, default=0.01)
 
     args.add_argument('--train_nsm', action="store_true")
     args.add_argument('--use_neg', action="store_true")

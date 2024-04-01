@@ -24,7 +24,7 @@ class args:
 
 device = torch.device(f"cuda:{args.device}" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
-data_loader = train_data_loader
+data_loader = test_data_loader
 
 # %%
 ''' Evaluate the Hessian trace '''
@@ -73,18 +73,22 @@ def compute_hessians_trace(model, criterion, data, target, device = "cpu", maxIt
             break
         else:
             trace = np.mean(trace_vhv)
-    return np.mean(np.array(layer_traces), axis=0)
+    return np.mean(np.array(layer_traces), axis=0), loss.cpu().item()
 
 model.eval()
 traces = []
+max_traces = np.zeros((2))
+max_loss = 0
 for data, target in data_loader:
-    layer_traces = compute_hessians_trace(model, nll_loss, data, target, device=device)
+    layer_traces, loss = compute_hessians_trace(model, nll_loss, data, target, device=device)
     
     traces.append(np.sum(layer_traces))
-    
+    max_traces = np.maximum(max_traces, layer_traces)
+    max_loss = max(max_loss, loss)
     print(layer_traces)
     print("sum of trace: {}".format(np.sum(layer_traces)))
     print("sum of hessian traces: {}".format(np.mean(traces)))
+    print("max of hessian traces: {}\tmax loss: {}".format(max_traces, max_loss))
         
 # %%
 ''' Define a function to calculate stability '''
@@ -146,6 +150,7 @@ def calculate_stability(model, data_loader, eps=1e-3, device = "cpu", runs = 10)
         differences.append(differece.cpu().item()/2)
     return differences
 
+# %%
 if args.sample_size < len(data_loader.sampler.indices):
         data_loader.sampler.indices = data_loader.sampler.indices[:args.sample_size]
 for eps in np.arange(0.02, 0.041, 0.001):
@@ -154,3 +159,26 @@ for eps in np.arange(0.02, 0.041, 0.001):
     print("Noise stability of {}: {:.4f} +/- {:.4f}".format(
         eps, np.mean(diff_losses), np.std(diff_losses)
     ))
+
+# %%
+train_loss = compute_loss(model, train_data_loader, device)
+test_loss = compute_loss(model, test_data_loader, device)
+
+
+# %%
+train_loss, test_loss = 0.02720494568347931, 0.06853332370519638
+
+max_traces = np.array([37.96546761, 57.63991912])
+norms = np.array([16.30604362,  4.63564253])
+max_loss = 0.1378830522298813
+train_num = 60000
+
+bound = max_loss*np.math.sqrt((max_traces.sum()*np.square(norms).sum())/train_num)
+
+# %% 
+state_dict = torch.load(state_dict_dir)['state_dict']
+weights = []
+for key, value in state_dict.items():
+    if ("weight" in key) and (len(value.size())!=1):
+        weights.append(value)
+norms = np.array([torch.norm(weight).cpu().item() for weight in weights])
