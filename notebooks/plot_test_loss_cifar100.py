@@ -34,14 +34,14 @@ for i in range(len(x_axis)):
     scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{w/o}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
     sgd - sgd_std, color="royalblue", alpha=0.1
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{w/}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
@@ -50,21 +50,21 @@ plt.fill_between(
 
 
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
-#ax.set_ylabel(r"$\mathrm{Test~loss}$", fontsize = 36)
+ax.set_xlabel(r"$t$", fontsize = 36)
+ax.set_ylabel(r"$L(f_W)$", fontsize = 36)
 ax.tick_params(labelsize=36)
 # ax.set_ylim([-300, 9000]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
 
 ax.set_ylim([0.48, 0.75]) 
-plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25$", r"$30$"])
+plt.xticks(np.arange(0, 7, 2), [r"$0$", r"$10$", r"$20$", r"$30$"])
 # ax.set_title(r'$\mathrm{ResNet}$'+'-'+r'$\mathrm{34}$', fontsize=42)
 
 # ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 # ax.yaxis.get_offset_text().set_fontsize(28)
 
-ax.set_title(r'$\mathrm{Test~Loss}$', fontsize=36)
-plt.legend(fontsize=36)
+ax.set_title(r'$\mathrm{ResNet}$', fontsize=32)
+plt.legend(fontsize=32)
 
 ax.grid(lw=0.8)
 plt.tight_layout()

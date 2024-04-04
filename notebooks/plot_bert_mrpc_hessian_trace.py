@@ -53,23 +53,23 @@ plt.fill_between(
     ours - ours_std, color="royalblue", alpha=0.3
 )
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
-#ax.set_ylabel(r"$\mathrm{Trace}$", fontsize = 36)
+ax.set_xlabel(r"$t$", fontsize = 36)
+ax.set_ylabel(r"$\nabla^2 \hat L(f_W)$", fontsize = 36)
 ax.tick_params(labelsize=36)
-ax.set_ylim([-1000, 14000]) 
+ax.set_ylim([500, 11500]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
-plt.yticks(np.arange(1000, 14001, 3000), [r"$0.1$", r"$0.4$", r"$0.7$", r"$1.0$", r"$1.3$"])
+plt.yticks(np.arange(1000, 12001, 3000))#, [r"$0.1$", r"$0.4$", r"$0.7$", r"$1.0$", r"$1.3$"])
 
 # plt.xticks(np.arange(0.4, 0.81, 0.2), fontsize=28)
 # ax.set_xlim([-0.5, 9.5]) 
 #plt.yticks(np.arange(0, 14001, 3000))
-plt.xticks(np.arange(0, 7, 1))
+plt.xticks(np.arange(0, 7, 2))
 
 # plt.gca().invert_xaxis()
-ax.set_title(r'$\mathrm{Hessian~Trace}$' + r' $(\times$' + r'$10^4)$', fontsize=36)
+ax.set_title(r'$\mathrm{BERT}$', fontsize=32) # + r' $(\times$' + r'$10^4)$'
 
-#ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-#ax.yaxis.get_offset_text().set_fontsize(28)
+ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+ax.yaxis.get_offset_text().set_fontsize(28)
 
 
 #plt.legend(fontsize=36)

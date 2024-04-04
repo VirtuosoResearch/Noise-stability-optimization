@@ -33,33 +33,33 @@ for i in range(len(x_axis)):
     scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{w/o}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
     sgd - sgd_std, color="royalblue", alpha=0.1
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{w/}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
     ours - ours_std, color="royalblue", alpha=0.1
 )
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
-#ax.set_ylabel(r"$\mathrm{Test~loss}$", fontsize = 36)
+ax.set_xlabel(r"$t$", fontsize = 36)
+ax.set_ylabel(r"$L(f_W)$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([0.57, 1.03])
 plt.yticks(np.arange(0.6, 1.1, 0.2))
-plt.xticks(np.arange(0, 7, 1))
+plt.xticks(np.arange(0, 7, 2))
 
 # plt.gca().invert_xaxis()
 # ax.set_title(r'$\mathrm{BERT}$'+'-'+r'$\mathrm{Base}$', fontsize=42)
-ax.set_title(r'$\mathrm{Test~Loss}$', fontsize=36)
+ax.set_title(r'$\mathrm{BERT}$', fontsize=32)
 
 
-plt.legend(fontsize=36, loc="upper right")
+plt.legend(fontsize=32, loc="upper right")
 
 ax.grid(lw=0.8)
 plt.tight_layout()
