@@ -23,7 +23,7 @@ ours_std = np.array([0.005874, 0.005148, 0.005184, 0.004596, 0.004896, 0.004656,
        0.00516 ])
 
 
-f, ax = plt.subplots(figsize=(6,7)) 
+f, ax = plt.subplots(figsize=(6,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -34,14 +34,14 @@ for i in range(len(x_axis)):
     scatter2 = ax.scatter(x_axis[i], ours[i], s=80, marker="o", edgecolors = "none", facecolors='black')
 
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=6, color="royalblue", label=r"$\mathrm{w/o}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
     sgd - sgd_std, color="royalblue", alpha=0.1
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{Alg.~1}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=6, color="royalblue", label=r"$\mathrm{w/}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 

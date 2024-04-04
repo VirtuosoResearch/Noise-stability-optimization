@@ -26,7 +26,7 @@ ours_std = np.array([ 32.72729738, 208.87454871, 206.83659249, 227.45298708,
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,7)) 
+f, ax = plt.subplots(figsize=(6,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -72,7 +72,7 @@ ax.set_title(r'$\mathrm{Hessian~Trace}$' + r' $(\times$' + r'$10^4)$', fontsize=
 #ax.yaxis.get_offset_text().set_fontsize(28)
 
 
-plt.legend(fontsize=36)
+#plt.legend(fontsize=36)
 
 ax.grid(lw=0.2)
 plt.tight_layout()

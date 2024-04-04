@@ -25,7 +25,7 @@ ours_std = np.array([
 0, 0.01042135473, 0.01613012723, 0.009875838425, 0.00852375003, 0.008721933781, 0.008830141747
 ])
 
-f, ax = plt.subplots(figsize=(6,7)) 
+f, ax = plt.subplots(figsize=(6,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -70,7 +70,7 @@ ax.set_title(r'$\mathrm{Generalization~Gap}$', fontsize=36)
 
 # plt.gca().invert_xaxis()
 
-plt.legend(fontsize=36,loc=4)
+#plt.legend(fontsize=36,loc=4)
 
 ax.grid(lw=0.2)
 plt.tight_layout()
