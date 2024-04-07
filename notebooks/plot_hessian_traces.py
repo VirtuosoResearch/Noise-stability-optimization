@@ -57,6 +57,7 @@ ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(40)
 plt.yticks(np.arange(0, 12001, 3000))
 plt.ylim([0, 13001])
+ax.set_ylabel(r'$\mathrm{Tr}[\nabla^2]$', fontsize=52)
 
 plt.tick_params(axis='x')
 
@@ -67,15 +68,15 @@ plt.tick_params(axis='x')
 #    loc=1, fontsize=28, ncol=3)
 ax.legend(
     ( rects6[0], rects3[0], rects2[0]), 
-    (r'$\mathrm{Alg.~1}$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
+    (r'$\mathrm{NSO}~(k=1)$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
     loc=2, fontsize=42, ncol=3)
 
 
 
 ax.yaxis.grid(True, lw=0.4)
-ax.set_title(r'$\mathrm{Trace~of~Hessian}$', fontsize=48, x=0.474, y=1.02)
+#ax.set_title(r'$\mathrm{Trace~of~Hessian}$', fontsize=48, x=0.474, y=1.02)
 
-ax.tick_params(axis='both', which='major', labelsize=52)
+ax.tick_params(axis='both', which='major', labelsize=48)
 ax.tick_params(axis='both', which='minor', labelsize=52)
 
 plt.tight_layout()

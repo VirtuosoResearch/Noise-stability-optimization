@@ -25,7 +25,7 @@ ours_std = np.array([
 0, 0.01042135473, 0.01613012723, 0.009875838425, 0.00852375003, 0.008721933781, 0.008830141747
 ])
 
-f, ax = plt.subplots(figsize=(6,7)) 
+f, ax = plt.subplots(figsize=(6,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -52,8 +52,8 @@ plt.fill_between(
     ours - ours_std, color="royalblue", alpha=0.3
 )
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
-#ax.set_ylabel(r"$\mathrm{Generalization~Gap}$", fontsize = 28)
+ax.set_xlabel(r"$t$", fontsize = 36)
+ax.set_ylabel(r"$L(f_W) - \hat L(f_W)$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([-0.05, 0.85]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
@@ -61,8 +61,8 @@ ax.set_ylim([-0.05, 0.85])
 # plt.xticks(np.arange(0.4, 0.81, 0.2), fontsize=28)
 # ax.set_xlim([-0.5, 9.5]) 
 plt.yticks(np.arange(0., 0.81, 0.2), ) # [r"$0$", "", r"$0.2$", "", r"$0.4$"]
-plt.xticks(np.arange(0, 7, 1))
-ax.set_title(r'$\mathrm{Generalization~Gap}$', fontsize=36)
+plt.xticks(np.arange(0, 7, 2))
+ax.set_title(r'$\mathrm{BERT}$', fontsize=32)
 
 #ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 #ax.yaxis.get_offset_text().set_fontsize(28)
@@ -70,7 +70,7 @@ ax.set_title(r'$\mathrm{Generalization~Gap}$', fontsize=36)
 
 # plt.gca().invert_xaxis()
 
-plt.legend(fontsize=36,loc=4)
+#plt.legend(fontsize=36,loc=4)
 
 ax.grid(lw=0.2)
 plt.tight_layout()

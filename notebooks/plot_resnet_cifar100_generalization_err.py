@@ -27,7 +27,7 @@ ours_std = np.array([
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,7)) 
+f, ax = plt.subplots(figsize=(6,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -54,8 +54,8 @@ plt.fill_between(
     ours - ours_std, color="royalblue", alpha=0.3
 )
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
-#ax.set_ylabel(r"$\mathrm{Generalization~Gap}$", fontsize = 36)
+ax.set_xlabel(r"$t$", fontsize = 36)
+ax.set_ylabel(r"$L(f_W) - \hat L(f_W)$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([-0.05, 1.25]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
@@ -63,12 +63,12 @@ ax.set_ylim([-0.05, 1.25])
 # plt.xticks(np.arange(0.4, 0.81, 0.2), fontsize=28)
 # ax.set_xlim([-0.5, 9.5]) 
 plt.yticks(np.arange(0., 1.21, 0.3),) # [r"$0$", "", r"$0.2$", "", r"$0.4$"]  
-plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25$", r"$30$"])
+plt.xticks(np.arange(0, 7, 2), [r"$0$", r"$10$", r"$20$", r"$30$"])
 
-ax.set_title(r'$\mathrm{Generalization~Gap}$', fontsize=36)
+ax.set_title(r'$\mathrm{ResNet}$', fontsize=32)
 # plt.gca().invert_xaxis()
 
-plt.legend(fontsize=36)
+#plt.legend(fontsize=36)
 
 ax.grid(lw=0.8)
 plt.tight_layout()
