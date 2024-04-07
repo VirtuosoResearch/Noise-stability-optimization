@@ -27,7 +27,7 @@ U = np.random.randn(d, d) * init_scale
 
 perturb = 0.02
 max_epochs = 20001
-perturb_flag = True
+perturb_flag = False
 print('max epochs', max_epochs, lr, 'perturb', perturb, perturb_flag)
 for epoch in range(1, max_epochs):
     U = train_NSO(Ais, y_true, U, lr, perturb, d, perturb_flag)
