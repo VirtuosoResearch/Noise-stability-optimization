@@ -39,37 +39,37 @@ for i in range(len(x_axis)):
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, nso, linestyle='--', lw=4, color="orange", label=r"$\mathrm{w/o~Data~Aug.}$")
+plt.errorbar(x_axis, nso, linestyle='--', lw=4, color="k", label=r"$\mathrm{w/o~weight~decay}$")
 plt.fill_between(
     x_axis, 
     nso + nso_std, 
-    nso - nso_std, color="orange", alpha=0.3
+    nso - nso_std, color="k", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{w/~Data~Aug.}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="r", label=r"$\mathrm{w/~weight~decay}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="royalblue", alpha=0.3
+    ours - ours_std, color="r", alpha=0.3
 )
 
-ax.set_xlabel(r"$\mathrm{Number~of~Epochs}$", fontsize = 36)
-# ax.set_ylabel(r"$\mathrm{Trace}$", fontsize = 36)
+ax.set_xlabel(r"$t$", fontsize = 36)
+ax.set_ylabel(r"$\mathrm{Trace}$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([2300, 8500]) 
-plt.yticks(np.arange(3000, 8001, 2000), [r"$3.0$", r"$5.0$", r"$7.0$"])
+plt.yticks(np.arange(3000, 8001, 2000))
 
-plt.xticks(np.arange(0, 7, 1), [r"$0$", r"$5$", r"$10$", r"$15$", r"$20$", r"$25$", r"$30$"])
-ax.set_title(r'$\mathrm{Hessian~trace}$' + r' $(\times$' + r'$10^3)$', fontsize=36)
+plt.xticks(np.arange(0, 7, 2), [r"$0$", r"$10$", r"$20$", r"$30$"])
+#ax.set_title(r'$\mathrm{Hessian~trace}$' + r' $(\times$' + r'$10^3)$', fontsize=36)
 
-#ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-#ax.yaxis.get_offset_text().set_fontsize(36)
+ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+ax.yaxis.get_offset_text().set_fontsize(36)
 
 # plt.gca().invert_xaxis()
 
-# plt.legend(fontsize=36)
+plt.legend(fontsize=30)
 
-ax.grid(lw=0.8)
+ax.grid(ls=":", lw=0.4)
 plt.tight_layout()
 plt.savefig(f"./resnet_indoor_hessia_trace_weight_decay.pdf", format="pdf", dpi=1200)
 plt.show()
