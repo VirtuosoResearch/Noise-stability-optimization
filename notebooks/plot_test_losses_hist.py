@@ -38,7 +38,7 @@ rects2 = ax.bar(ind + width * 4 + shift*4, l2, width, color='lightgrey', ecolor=
 
 ax.set_ylim([0, 0.87])
 ax.set_yticks(np.arange(0, 0.85, 0.2))
-ax.set_ylabel(r'$\mathrm{Test~Loss}$', fontsize=52)
+ax.set_ylabel(r'$L(f_W)$', fontsize=52)
 ax.set_xticks(ind + width  + shift + 10)# 
 ax.set_xticklabels(msa_name_list, fontsize=40)
 
@@ -51,10 +51,10 @@ ax.yaxis.get_offset_text().set_fontsize(40)
 plt.tick_params(axis='x')
 
 
-# ax.legend(
-#     (rects6[0], rects3[0], rects2[0]), 
-#     (r'$\mathrm{NSO}$', r'$\mathrm{SAM}$', r'$\mathrm{WP-SGD}$'), 
-#     loc=1, fontsize=40, ncol=3)
+ax.legend(
+     (rects6[0], rects3[0], rects2[0]), 
+     (r'$\mathrm{NSO}~(k=1)$', r'$\mathrm{SAM}$', r'$\mathrm{SGD}$'), 
+     loc=1, fontsize=40, ncol=3)
 
 ax.yaxis.grid(True, lw=0.4)
 #ax.set_title(r'$\mathrm{Test~Loss}$', fontsize=48, x=0.474, y=1.02)
