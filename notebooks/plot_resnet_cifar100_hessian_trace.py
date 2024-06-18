@@ -27,7 +27,7 @@ ours_std = np.array([16.36364869, 69.62484957, 68.94553083, 75.81766236, 91.4061
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,5.5)) 
+f, ax = plt.subplots(figsize=(7,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -40,22 +40,22 @@ for i in range(len(x_axis)):
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="r", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="royalblue", alpha=0.3
+    sgd - sgd_std, color="r", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{Alg.~1}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="r", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="royalblue", alpha=0.3
+    ours - ours_std, color="r", alpha=0.3
 )
 
 ax.set_xlabel(r"$t$", fontsize = 36)
-ax.set_ylabel(r"$\nabla^2 \hat L(f_W)$", fontsize = 36)
+ax.set_ylabel(r"$\mathrm{Trace}$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([1500, 8000]) 
 #plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
@@ -66,16 +66,16 @@ plt.yticks(np.arange(2000, 8001, 2000))#, [r"$1.0$", r"$3.0$", r"$5.0$", r"$7.0$
 #plt.yticks([])
 
 plt.xticks(np.arange(0, 7, 2), [r"$0$", r"$10$", r"$20$", r"$30$"])
-ax.set_title(r'$\mathrm{ResNet}$', fontsize=32)
+ax.set_title(r'$\mathrm{ResNet~34}$', fontsize=32)
 
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(28)
 
 # plt.gca().invert_xaxis()
 
-#plt.legend(fontsize=36)
+plt.legend(fontsize=30)
 
-ax.grid(lw=0.8)
+ax.grid(lw=0.5,ls=":")
 plt.tight_layout()
 plt.savefig(f"./resnet_cifar100_hessian_traces.pdf", format="pdf", dpi=1200)
 plt.show()

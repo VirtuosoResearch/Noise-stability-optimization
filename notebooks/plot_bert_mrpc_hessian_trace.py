@@ -26,7 +26,7 @@ ours_std = np.array([ 32.72729738, 208.87454871, 206.83659249, 227.45298708,
 
 
 # %%
-f, ax = plt.subplots(figsize=(6,5.5)) 
+f, ax = plt.subplots(figsize=(7,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -39,22 +39,22 @@ for i in range(len(x_axis)):
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="r", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="royalblue", alpha=0.3
+    sgd - sgd_std, color="r", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{Alg.~1}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="r", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="royalblue", alpha=0.3
+    ours - ours_std, color="r", alpha=0.3
 )
 
 ax.set_xlabel(r"$t$", fontsize = 36)
-ax.set_ylabel(r"$\nabla^2 \hat L(f_W)$", fontsize = 36)
+ax.set_ylabel(r"$\mathrm{Trace}$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([500, 11500]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
@@ -66,15 +66,15 @@ plt.yticks(np.arange(1000, 12001, 3000))#, [r"$0.1$", r"$0.4$", r"$0.7$", r"$1.0
 plt.xticks(np.arange(0, 7, 2))
 
 # plt.gca().invert_xaxis()
-ax.set_title(r'$\mathrm{BERT}$', fontsize=32) # + r' $(\times$' + r'$10^4)$'
+ax.set_title(r'$\mathrm{BERT~Base}$', fontsize=32) # + r' $(\times$' + r'$10^4)$'
 
 ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ax.yaxis.get_offset_text().set_fontsize(28)
 
 
-#plt.legend(fontsize=36)
+plt.legend(fontsize=30)
 
-ax.grid(lw=0.2)
+ax.grid(lw=0.5,ls=":")
 plt.tight_layout()
 plt.savefig(f"./bert_mrpc_hessian_traces.pdf", format="pdf", dpi=1200)
 plt.show()

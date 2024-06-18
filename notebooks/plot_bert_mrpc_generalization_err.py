@@ -25,7 +25,7 @@ ours_std = np.array([
 0, 0.01042135473, 0.01613012723, 0.009875838425, 0.00852375003, 0.008721933781, 0.008830141747
 ])
 
-f, ax = plt.subplots(figsize=(6,5.5)) 
+f, ax = plt.subplots(figsize=(7,5.5)) 
 
 x_axis = np.arange(len(sgd))
 
@@ -38,22 +38,22 @@ for i in range(len(x_axis)):
 # ax.plot(x_axis, auc_clintox,  lw=3, color="darkblue", ls='solid')
 # ax.plot(x_axis, auc_bbbp,  lw=3, color="darkred", ls='solid')
 
-plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="royalblue", label=r"$\mathrm{SGD}$")
+plt.errorbar(x_axis, sgd, linestyle='--', lw=4, color="r", label=r"$\mathrm{SGD}$")
 plt.fill_between(
     x_axis, 
     sgd + sgd_std, 
-    sgd - sgd_std, color="royalblue", alpha=0.3
+    sgd - sgd_std, color="r", alpha=0.3
 )
 
-plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="royalblue", label=r"$\mathrm{Alg.~1}$")
+plt.errorbar(x_axis, ours, linestyle='solid', lw=4, color="r", label=r"$\mathrm{NSO}$")
 plt.fill_between(
     x_axis, 
     ours + ours_std, 
-    ours - ours_std, color="royalblue", alpha=0.3
+    ours - ours_std, color="r", alpha=0.3
 )
 
 ax.set_xlabel(r"$t$", fontsize = 36)
-ax.set_ylabel(r"$L(f_W) - \hat L(f_W)$", fontsize = 36)
+ax.set_ylabel(r"$\mathrm{Generalization~Gap}$", fontsize = 36)
 ax.tick_params(labelsize=36)
 ax.set_ylim([-0.05, 0.85]) 
 # plt.yticks([3, 6, 9, 12], [r"$10^3$", r"$10^{6}$", r"$10^{9}$", r"$10^{12}$"])
@@ -62,7 +62,7 @@ ax.set_ylim([-0.05, 0.85])
 # ax.set_xlim([-0.5, 9.5]) 
 plt.yticks(np.arange(0., 0.81, 0.2), ) # [r"$0$", "", r"$0.2$", "", r"$0.4$"]
 plt.xticks(np.arange(0, 7, 2))
-ax.set_title(r'$\mathrm{BERT}$', fontsize=32)
+ax.set_title(r'$\mathrm{BERT~Base}$', fontsize=32)
 
 #ax.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 #ax.yaxis.get_offset_text().set_fontsize(28)
@@ -70,9 +70,9 @@ ax.set_title(r'$\mathrm{BERT}$', fontsize=32)
 
 # plt.gca().invert_xaxis()
 
-#plt.legend(fontsize=36,loc=4)
+plt.legend(fontsize=30)
 
-ax.grid(lw=0.2)
+ax.grid(lw=0.5,ls=":")
 plt.tight_layout()
 plt.savefig(f"./bert_mrpc_generalization_errs.pdf", format="pdf", dpi=1200)
 plt.show()
