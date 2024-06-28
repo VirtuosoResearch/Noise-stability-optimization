@@ -132,19 +132,6 @@ python compute_hessian_measures.py --config configs/config_glue.json --task_name
     --checkpoint_dir $specify_a_checkpoint_dir --checkpoint_name $specify_a_checkpoint_name --save_name $specify_a_save_filename --sample_size $sample_size
 ```
 
-### Citation
-
-If you find this repository useful or happen to use it in a research paper, please cite our work with the following bib information.
-
-```latex
-@article{ju2022robust,
-  title={Robust Fine-Tuning of Deep Neural Networks with Hessian-based Generalization Guarantees},
-  author={Ju, Haotian and Li, Dongyue and Zhang, Hongyang R},
-  journal={International Conference on Machine Learning},
-  year={2022}
-}
-```
-
 ### Acknowledgment
 
 Thanks to the authors of the following repositories for providing their implementation publicly available.
