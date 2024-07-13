@@ -1,7 +1,7 @@
 import torch
 
 class SAM(torch.optim.Optimizer):
-    def __init__(self, params, base_optimizer, rho=0.05, adaptive=False, **kwargs):
+    def __init__(self, params, base_optimizer, rho=0.05, adaptive=False, unnormalize=False, **kwargs):
         assert rho >= 0.0, f"Invalid rho, should be non-negative: {rho}"
 
         defaults = dict(rho=rho, adaptive=adaptive, **kwargs)
@@ -9,10 +9,11 @@ class SAM(torch.optim.Optimizer):
 
         self.base_optimizer = base_optimizer(self.param_groups, **kwargs)
         self.param_groups = self.base_optimizer.param_groups
+        self.unnormalize = unnormalize
 
     @torch.no_grad()
     def first_step(self, zero_grad=False):
-        grad_norm = self._grad_norm()
+        grad_norm = self._grad_norm() if not self.unnormalize else torch.Tensor([1.0]).to(self.param_groups[0]["params"][0].device)
         for group in self.param_groups:
             scale = group["rho"] / (grad_norm + 1e-12)
 

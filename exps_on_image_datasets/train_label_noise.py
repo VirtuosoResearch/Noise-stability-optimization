@@ -163,11 +163,14 @@ def main(config, args):
                         swa_lr=args.swa_lr)
         elif args.train_sam:
             checkpoint_dir = os.path.join(
-            "./saved_hessians", 
-            "{}_{}_sam_{}_ada_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.sam_rho, args.sam_adaptive))
+            "./saved_revision", 
+            "{}_{}_sam_{}_ada_{}_bs_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.sam_rho, args.sam_adaptive, config["data_loader"]["args"]["batch_size"]) + \
+                ("_unnormalize" if args.sam_unnormalize else "")
+            )
             base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
             optimizer = SAM(model.parameters(), base_optimizer, rho=args.sam_rho, 
-                            adaptive=args.sam_adaptive, **dict(config["optimizer"]["args"]))
+                            adaptive=args.sam_adaptive, unnormalize=args.sam_unnormalize,
+                            **dict(config["optimizer"]["args"]))
             lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
             trainer = SAMTrainer(model, criterion, metrics, optimizer,
                             config=config,
@@ -210,9 +213,9 @@ def main(config, args):
                             checkpoint_dir=checkpoint_dir)
         elif args.train_nsm:
             checkpoint_dir = os.path.join(
-                "./saved",
-                "{}_{}_nsm_{}_{}_{}_{}_distribution_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
-                                               args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg, args.nsm_distribution))
+                "./saved_revision",
+                "{}_{}_nsm_{}_{}_{}_{}_distribution_{}_bs_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
+                                               args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg, args.nsm_distribution, config["data_loader"]["args"]["batch_size"]))
             if config["optimizer"]["args"]["weight_decay"] != 0:
                 checkpoint_dir = checkpoint_dir + "_wd_{}".format(config["optimizer"]["args"]["weight_decay"])
             if args.use_augmentation:
@@ -347,6 +350,7 @@ if __name__ == '__main__':
     args.add_argument('--train_sam', action="store_true")
     args.add_argument('--sam_rho', type=float, default=0.05)
     args.add_argument('--sam_adaptive', action="store_true")
+    args.add_argument('--sam_unnormalize', action="store_true")
 
     args.add_argument('--train_rsam', action="store_true")
     args.add_argument('--rsam_rho', type=float, default=0.05)

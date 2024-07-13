@@ -128,3 +128,4 @@ clothing1m.tar
 
 scripts/
 test-logistic-regression/
+!exps_on_image_datasets/scripts/
