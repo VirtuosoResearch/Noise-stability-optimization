@@ -24,15 +24,15 @@ def main(config, args):
 
     # setup data_loader instances
     if config["data_loader"]["type"] == "CaltechDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data, idx_start = 0, img_num = 30, phase = "train")
-        valid_data_loader = config.init_obj('data_loader', module_data, idx_start = 30, img_num = 20, phase = "val")
-        test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test")
+        train_data_loader = config.init_obj('data_loader', module_data, idx_start = 0, img_num = 30, phase = "train", use_augmentation = args.use_augmentation)
+        valid_data_loader = config.init_obj('data_loader', module_data, idx_start = 30, img_num = 20, phase = "val", use_augmentation = args.use_augmentation)
+        test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test", use_augmentation = args.use_augmentation)
     elif config["data_loader"]["type"] == "AircraftsDataLoader" \
         or config["data_loader"]["type"] == "DomainNetDataLoader" \
         or config["data_loader"]["type"] == "CXRDataLoader" :
-        train_data_loader = config.init_obj('data_loader', module_data, phase = "train")
-        valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
-        test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
+        train_data_loader = config.init_obj('data_loader', module_data, phase = "train", use_augmentation = args.use_augmentation)
+        valid_data_loader = config.init_obj('data_loader', module_data, phase = "val", use_augmentation = args.use_augmentation)
+        test_data_loader = config.init_obj('data_loader', module_data, phase = "test", use_augmentation = args.use_augmentation)
         # valid_data_loader = test_data_loader
     elif config["data_loader"]["type"] == "BirdsDataLoader" or \
         config["data_loader"]["type"] == "CarsDataLoader" or \
@@ -40,15 +40,15 @@ def main(config, args):
         config["data_loader"]["type"] == "IndoorDataLoader" or \
         config["data_loader"]["type"] == "Cifar10DataLoader" or \
         config["data_loader"]["type"] == "Cifar100DataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.1, phase = "train")
+        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.1, phase = "train", use_augmentation = args.use_augmentation)
         valid_data_loader = train_data_loader.split_validation()
-        test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
+        test_data_loader = config.init_obj('data_loader', module_data, phase = "test", use_augmentation = args.use_augmentation)
     elif config["data_loader"]["type"] == "FlowerDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data)
+        train_data_loader = config.init_obj('data_loader', module_data, use_augmentation = args.use_augmentation)
         valid_data_loader = train_data_loader.split_validation()
         test_data_loader = train_data_loader.split_test()
     elif config["data_loader"]["type"] == "AnimalAttributesDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data)
+        train_data_loader = config.init_obj('data_loader', module_data, use_augmentation = args.use_augmentation)
         valid_data_loader = train_data_loader.split_validation()
         test_data_loader = train_data_loader.split_test()
     elif config["data_loader"]["type"] == "MessidorDataLoader" or \
@@ -211,9 +211,16 @@ def main(config, args):
         elif args.train_nsm:
             checkpoint_dir = os.path.join(
                 "./saved",
-                "{}_{}_nsm_{}_{}_{}_{}_epochs_{}".format(config["arch"]["type"], config["data_loader"]["type"], args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg, args.epochs))
+                "{}_{}_nsm_{}_{}_{}_{}_distribution_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
+                                               args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg, args.nsm_distribution))
+            if config["optimizer"]["args"]["weight_decay"] != 0:
+                checkpoint_dir = checkpoint_dir + "_wd_{}".format(config["optimizer"]["args"]["weight_decay"])
+            if args.use_augmentation:
+                checkpoint_dir = checkpoint_dir + "_aug"
+            if config["reg_method"] == "penalty":
+                checkpoint_dir = checkpoint_dir + "_penalty"
             base_optimizer = getattr(torch.optim, config["optimizer"]["type"])
-            optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, **dict(config["optimizer"]["args"]))
+            optimizer = NSM(model.parameters(), base_optimizer, sigma=args.nsm_sigma, distribution=args.nsm_distribution, **dict(config["optimizer"]["args"]))
             lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer.base_optimizer)
             trainer = NSMTrainer(model, criterion, metrics, optimizer,
                             config=config,
@@ -226,9 +233,19 @@ def main(config, args):
                             nsm_lam=args.nsm_lam,
                             num_perturbs=args.num_perturbs,
                             use_neg=args.use_neg)
+
+            if config["reg_method"] == "penalty":
+                lambda_extractor = config["reg_extractor"]
+                lambda_pred_head = config["reg_predictor"]
+                scale_factor = config["scale_factor"]
+                print(lambda_extractor, lambda_pred_head, scale_factor)
+                trainer.add_penalty(
+                    norm = config["reg_norm"], lambda_extractor = lambda_extractor, lambda_pred_head=lambda_pred_head, 
+                    state_dict = source_state_dict, scale_factor=scale_factor
+                )
         elif args.train_nsmswa:
             checkpoint_dir = os.path.join(
-                "./saved_hessians",
+                "./saved",
                 "{}_{}_nsm_{}_{}_{}_{}_swa_{}_{}".format(
                 config["arch"]["type"], config["data_loader"]["type"], 
                 args.nsm_lam, args.nsm_sigma, args.num_perturbs, args.use_neg,
@@ -251,7 +268,7 @@ def main(config, args):
                             swa_lr=args.swa_lr)
         else:
             checkpoint_dir = os.path.join(
-            "./saved_hessians", 
+            "./saved", 
             "{}_{}_{}_{}_{:.4f}_{:.4f}_run_{}".format(config["arch"]["type"], config["data_loader"]["type"], 
                                     config["reg_method"], config["reg_norm"],
                                     config["reg_extractor"], config["reg_predictor"], run))
@@ -345,8 +362,10 @@ if __name__ == '__main__':
     args.add_argument('--nsm_sigma', type=float, default=0.01)
     args.add_argument('--num_perturbs', type=int, default=1)
     args.add_argument('--nsm_lam', type=float, default=0.5)
+    args.add_argument('--nsm_distribution', type=str, default="normal")
 
     args.add_argument('--train_nsmswa', action="store_true")
+    args.add_argument('--use_augmentation', action="store_true")
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')

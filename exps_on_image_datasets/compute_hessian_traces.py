@@ -38,30 +38,30 @@ def main(config, args):
 
     # setup data_loader instances
     if config["data_loader"]["type"] == "CaltechDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data, idx_start = 0, img_num = 30, phase = "train")
-        valid_data_loader = config.init_obj('data_loader', module_data, idx_start = 30, img_num = 20, phase = "val")
-        test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test")
+        train_data_loader = config.init_obj('data_loader', module_data, idx_start = 0, img_num = 30, phase = "train", use_augmentation = args.use_augmentation)
+        valid_data_loader = config.init_obj('data_loader', module_data, idx_start = 30, img_num = 20, phase = "val", use_augmentation = args.use_augmentation)
+        test_data_loader = config.init_obj('data_loader', module_data, idx_start = 50, img_num = 20, phase = "test", use_augmentation = args.use_augmentation)
     elif config["data_loader"]["type"] == "AircraftsDataLoader" \
         or config["data_loader"]["type"] == "DomainNetDataLoader"\
         or config["data_loader"]["type"] == "CXRDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data, phase = "train")
-        valid_data_loader = config.init_obj('data_loader', module_data, phase = "val")
-        test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
+        train_data_loader = config.init_obj('data_loader', module_data, phase = "train", use_augmentation = args.use_augmentation)
+        valid_data_loader = config.init_obj('data_loader', module_data, phase = "val", use_augmentation = args.use_augmentation)
+        test_data_loader = config.init_obj('data_loader', module_data, phase = "test", use_augmentation = args.use_augmentation)
     elif config["data_loader"]["type"] == "BirdsDataLoader" or \
         config["data_loader"]["type"] == "CarsDataLoader" or \
         config["data_loader"]["type"] == "DogsDataLoader" or \
         config["data_loader"]["type"] == "IndoorDataLoader" or \
         config["data_loader"]["type"] == "Cifar10DataLoader" or \
         config["data_loader"]["type"] == "Cifar100DataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.1, phase = "train")
+        train_data_loader = config.init_obj('data_loader', module_data, valid_split = 0.1, phase = "train", use_augmentation = args.use_augmentation)
         valid_data_loader = train_data_loader.split_validation()
-        test_data_loader = config.init_obj('data_loader', module_data, phase = "test")
+        test_data_loader = config.init_obj('data_loader', module_data, phase = "test", use_augmentation = args.use_augmentation)
     elif config["data_loader"]["type"] == "FlowerDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data)
+        train_data_loader = config.init_obj('data_loader', module_data, use_augmentation = args.use_augmentation)
         valid_data_loader = train_data_loader.split_validation()
         test_data_loader = train_data_loader.split_test()
     elif config["data_loader"]["type"] == "AnimalAttributesDataLoader":
-        train_data_loader = config.init_obj('data_loader', module_data)
+        train_data_loader = config.init_obj('data_loader', module_data, use_augmentation = args.use_augmentation)
         valid_data_loader = train_data_loader.split_validation()
         test_data_loader = train_data_loader.split_test()
     elif config["data_loader"]["type"] == "MessidorDataLoader" or \
@@ -102,7 +102,7 @@ def main(config, args):
     else:
         model = config.init_obj('arch', module_arch, pretrained=True)
 
-    file = os.path.join("./saved_hessians/", args.checkpoint_dir)
+    file = os.path.join("./saved/", args.checkpoint_dir)
     device, device_ids = prepare_device(config['n_gpu'])
     if args.load_multiple_points:
         assert len(args.checkpoint_names) > 0
@@ -210,6 +210,7 @@ if __name__ == '__main__':
 
     args.add_argument('--load_multiple_points', action="store_true")
     args.add_argument("--checkpoint_names", type=str, nargs="+", default=["model_epoch_20", "model_epoch_25", "model_epoch_30"])
+    args.add_argument("--use_augmentation", action="store_true")
 
     # custom cli options to modify configuration from default values given in json file.
     CustomArgs = collections.namedtuple('CustomArgs', 'flags type target')

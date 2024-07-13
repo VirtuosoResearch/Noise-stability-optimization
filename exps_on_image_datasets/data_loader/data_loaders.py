@@ -41,33 +41,36 @@ class MnistDataLoader(BaseDataLoader):
         super().__init__(self.dataset, batch_size, shuffle, validation_split, test_split=0, num_workers=num_workers)
 
 class Cifar10DataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", **kwargs):
+    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", use_augmentation=True, **kwargs):
         training = phase == "train"
-        if training:
+        if training and use_augmentation:
             trsfm = BaseDataLoader.train_transform
         else:
             trsfm = BaseDataLoader.test_transform
+        
         self.data_dir = data_dir
         self.dataset = CIFAR10(self.data_dir, train=training, download=True, transform=trsfm)
         super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=0, num_workers=num_workers)
 
 class Cifar100DataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", **kwargs):
+    def __init__(self, data_dir, batch_size, shuffle=True, valid_split=0.0, num_workers=1, phase="train", use_augmentation=True, **kwargs):
         training = phase == "train"
-        if training:
+        if training and use_augmentation:
             trsfm = BaseDataLoader.train_transform
         else:
             trsfm = BaseDataLoader.test_transform
+            
         self.data_dir = data_dir
         self.dataset = CIFAR100(self.data_dir, train=training, download=True, transform=trsfm)
         super().__init__(self.dataset, batch_size, shuffle, valid_split=valid_split, test_split=0, num_workers=num_workers)
 
 class CaltechDataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle, idx_start, img_num, num_workers, phase = "train", **kwargs):
-        if phase == "train":
+    def __init__(self, data_dir, batch_size, shuffle, idx_start, img_num, num_workers, phase = "train", use_augmentation=True, **kwargs):
+        if use_augmentation and phase == "train":
             trsfm = BaseDataLoader.train_transform
-        elif phase == "val" or phase == "test":
+        else:
             trsfm = BaseDataLoader.test_transform
+
         self.data_dir = data_dir
         self.dataset = Caltech256(
             self.data_dir, transform=trsfm, download=True, idx_start = idx_start, img_num=img_num
@@ -75,8 +78,11 @@ class CaltechDataLoader(BaseDataLoader):
         super().__init__(self.dataset, batch_size, shuffle, valid_split=0, test_split=0, num_workers=num_workers)
 
 class FlowerDataLoader(BaseDataLoader):
-    def __init__(self, data_dir, batch_size, shuffle, valid_split, test_split, num_workers, **kwargs):
-        trsfm = BaseDataLoader.train_transform
+    def __init__(self, data_dir, batch_size, shuffle, valid_split, test_split, num_workers, use_augmentation=True, **kwargs):
+        if use_augmentation:
+            trsfm = BaseDataLoader.train_transform
+        else:
+            trsfm = BaseDataLoader.test_transform
         self.data_dir = data_dir
         self.dataset = OxfordFlowers102Dataset(
             root_dir = self.data_dir, transform=trsfm, download=True 
@@ -85,10 +91,10 @@ class FlowerDataLoader(BaseDataLoader):
 
 class AircraftsDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle, num_workers, phase = "train", **kwargs):
-        if phase == "train":
+    def __init__(self, data_dir, batch_size, shuffle, num_workers, phase = "train", use_augmentation=True, **kwargs):
+        if use_augmentation and phase == "train":
             trsfm = BaseDataLoader.train_transform
-        elif phase == "val" or phase == "test":
+        else:
             trsfm = BaseDataLoader.test_transform
         self.data_dir = data_dir
         self.dataset = AircraftDataset(
@@ -98,11 +104,12 @@ class AircraftsDataLoader(BaseDataLoader):
 
 class BirdsDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", **kwargs):
-        if phase == "train":
+    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", use_augmentation=True, **kwargs):
+        if use_augmentation and  phase == "train":
             trsfm = BaseDataLoader.train_transform
-        elif phase == "val" or phase == "test":
+        else:
             trsfm = BaseDataLoader.test_transform
+        
         self.data_dir = data_dir
         self.dataset = BirdDataset(
             data_dir = self.data_dir, transform=trsfm, phase=phase
@@ -111,11 +118,12 @@ class BirdsDataLoader(BaseDataLoader):
 
 class CarsDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", **kwargs):
-        if phase == "train":
+    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", use_augmentation=True, **kwargs):
+        if use_augmentation and phase == "train":
             trsfm = BaseDataLoader.train_transform
-        elif phase == "val" or phase == "test":
+        else:
             trsfm = BaseDataLoader.test_transform
+
         self.data_dir = data_dir
         self.dataset = CarDataset(
             data_dir = self.data_dir, transform=trsfm, phase=phase
@@ -124,11 +132,12 @@ class CarsDataLoader(BaseDataLoader):
 
 class DogsDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", **kwargs):
-        if phase == "train":
-            trsfm = BaseDataLoader.train_transform
-        elif phase == "val" or phase == "test":
+    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", use_augmentation=True, **kwargs):
+        if use_augmentation and phase == "train":
+                trsfm = BaseDataLoader.train_transform
+        else:
             trsfm = BaseDataLoader.test_transform
+
         self.data_dir = data_dir
         self.dataset = DogDataset(
             data_dir = self.data_dir, transform=trsfm, phase=phase
@@ -137,14 +146,15 @@ class DogsDataLoader(BaseDataLoader):
 
 class IndoorDataLoader(BaseDataLoader):
 
-    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", strong_augment = False, **kwargs):
-        if phase == "train":
+    def __init__(self, data_dir, batch_size, shuffle, num_workers, valid_split = 0, phase = "train", use_augmentation=True, strong_augment = False, **kwargs):
+        if use_augmentation and phase == "train":
             if strong_augment:
                 trsfm = TransformFixMatch(size=224)
             else:
                 trsfm = BaseDataLoader.train_transform
-        elif phase == "val" or phase == "test":
+        else:
             trsfm = BaseDataLoader.test_transform
+        
         self.data_dir = data_dir
         self.dataset = IndoorDataset(
             data_dir = self.data_dir, transform=trsfm, phase=phase

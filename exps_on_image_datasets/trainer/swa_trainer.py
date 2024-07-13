@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 import os
 from .base_trainer import Trainer
-from torch.optim.swa_utils import AveragedModel, SWALR, update_bn
+from torch.optim.swa_utils import update_bn
 
 class SWATrainer(Trainer):
 

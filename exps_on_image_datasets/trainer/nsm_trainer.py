@@ -3,9 +3,11 @@ from utils.bypass_bn import enable_running_stats, disable_running_stats
 
 import torch
 import torch.nn.functional as F
+import torch.distributions as dist
 import os
 from .base_trainer import Trainer
 from torch.optim.swa_utils import AveragedModel, SWALR, update_bn
+from utils.constraint import add_penalty
 
 
 class NSMTrainer(Trainer):
@@ -20,6 +22,45 @@ class NSMTrainer(Trainer):
         self.num_perturbs = num_perturbs
         self.nsm_lam = nsm_lam
         self.use_neg = use_neg
+
+        self.penalty = []
+
+    def add_penalty(self, norm, lambda_extractor, lambda_pred_head, state_dict=None, scale_factor=1.0):
+        self.penalty.append(
+            {"norm": norm, 
+             "_lambda": lambda_extractor,
+             "excluding_key": "pred_head",
+             "including_key": "layer1",
+             "state_dict": state_dict}
+        )
+        self.penalty.append(
+            {"norm": norm, 
+             "_lambda": lambda_extractor,
+             "excluding_key": "pred_head",
+             "including_key": "layer2",
+             "state_dict": state_dict}
+        )
+        self.penalty.append(
+            {"norm": norm, 
+             "_lambda": lambda_extractor*scale_factor,
+             "excluding_key": "pred_head",
+             "including_key": "layer3",
+             "state_dict": state_dict}
+        )
+        self.penalty.append(
+            {"norm": norm, 
+             "_lambda": lambda_extractor*pow(scale_factor, 2),
+             "excluding_key": "pred_head",
+             "including_key": "layer4",
+             "state_dict": state_dict}
+        )
+        self.penalty.append(
+            {"norm": norm, 
+             "_lambda": lambda_pred_head,
+             "excluding_key": None,
+             "including_key": "pred_head",
+             "state_dict": None}
+        )
 
         
     def _train_epoch(self, epoch):
@@ -36,6 +77,7 @@ class NSMTrainer(Trainer):
             
             output = self.model(data)
             loss = self.criterion(output, target)
+            
             loss.backward()
             self.optimizer.store_gradients(zero_grad=True, store_weights=True, update_weight=self.nsm_lam)
 
@@ -45,11 +87,35 @@ class NSMTrainer(Trainer):
                 update_weight = (1-self.nsm_lam)/(2*self.num_perturbs) if self.use_neg else (1-self.nsm_lam)/(self.num_perturbs)
                 for i in range(self.num_perturbs):
                     self.optimizer.first_step(zero_grad=True, store_perturb=True)
-                    self.criterion(self.model(data), target).backward()
+                    loss = self.criterion(self.model(data), target)
+                    """Apply Penalties"""
+                    for penalty in self.penalty:
+                        loss += add_penalty(
+                            self.model, 
+                            penalty["norm"], 
+                            penalty["_lambda"], 
+                            excluding_key = penalty["excluding_key"],
+                            including_key = penalty["including_key"],
+                            state_dict=penalty["state_dict"]
+                        )
+                    """Apply Penalties"""
+                    loss.backward()
                     self.optimizer.store_gradients(zero_grad=True, store_weights=False, update_weight=update_weight)
                     if self.use_neg:
                         self.optimizer.first_step(zero_grad=True, store_perturb=False)
-                        self.criterion(self.model(data), target).backward()
+                        loss = self.criterion(self.model(data), target)
+                        """Apply Penalties"""
+                        for penalty in self.penalty:
+                            loss += add_penalty(
+                                self.model, 
+                                penalty["norm"], 
+                                penalty["_lambda"], 
+                                excluding_key = penalty["excluding_key"],
+                                including_key = penalty["including_key"],
+                                state_dict=penalty["state_dict"]
+                            )
+                        """Apply Penalties"""
+                        loss.backward()
                         self.optimizer.store_gradients(zero_grad=True, store_weights=False, update_weight=update_weight)
             self.optimizer.second_step(zero_grad=True)
 

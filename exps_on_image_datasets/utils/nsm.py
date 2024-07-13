@@ -1,7 +1,9 @@
 import torch
+import torch.distributions as dist
+import numpy as np
 
 class NSM(torch.optim.Optimizer):
-    def __init__(self, params, base_optimizer, sigma=0.05, **kwargs):
+    def __init__(self, params, base_optimizer, sigma=0.05, distribution=None, **kwargs):
         assert sigma >= 0.0, f"Invalid sigma, should be non-negative: {sigma}"
 
         defaults = dict(sigma=sigma, **kwargs)
@@ -9,6 +11,17 @@ class NSM(torch.optim.Optimizer):
 
         self.base_optimizer = base_optimizer(self.param_groups, **kwargs)
         self.param_groups = self.base_optimizer.param_groups
+
+        if distribution == "laplace":
+            self.distribution = dist.Laplace(0, 1/np.math.sqrt(2))
+        elif distribution == "uniform":
+            self.distribution = dist.Uniform(-np.math.sqrt(3), np.math.sqrt(3))
+        elif distribution == "binomial":
+            self.distribution = dist.Binomial(4, 0.5)
+        elif distribution == "cauchy":
+            self.distribution = dist.Cauchy(0, 1)
+        else:
+            self.distribution = dist.Normal(0, 1)
 
     @torch.no_grad()
     def store_gradients(self, zero_grad=False, store_weights=False, update_weight = 0.5):
@@ -33,7 +46,7 @@ class NSM(torch.optim.Optimizer):
                 if not p.requires_grad: continue
                 p.data = self.state[p]["old_p"].clone()  # restore original weights 
                 if store_perturb:
-                    e_w = torch.randn_like(p.data) * group["sigma"]
+                    e_w = self.distribution.sample(p.data.shape).to(p.device) * group["sigma"]
                     self.state[p]["perturb"] = e_w
                     p.add_(e_w)  # climb to the local maximum "w + e(w)"
                 else:

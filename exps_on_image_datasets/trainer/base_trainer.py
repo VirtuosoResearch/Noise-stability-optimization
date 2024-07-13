@@ -52,9 +52,9 @@ class Trainer:
             self.checkpoint_dir = config.save_dir
         if not os.path.exists(self.checkpoint_dir):
             os.mkdir(self.checkpoint_dir)
-        else:
-            for filename in os.listdir(self.checkpoint_dir):
-                os.remove(os.path.join(self.checkpoint_dir, filename))
+        # else:
+            # for filename in os.listdir(self.checkpoint_dir):
+            #     os.remove(os.path.join(self.checkpoint_dir, filename))
 
         self.train_data_loader = train_data_loader
         self.valid_data_loader = valid_data_loader
