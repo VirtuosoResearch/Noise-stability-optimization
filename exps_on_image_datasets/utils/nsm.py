@@ -23,6 +23,10 @@ class NSM(torch.optim.Optimizer):
         else:
             self.distribution = dist.Normal(0, 1)
 
+    def set_sigma(self, sigma):
+        for group in self.param_groups:
+            group["sigma"] = sigma
+
     @torch.no_grad()
     def store_gradients(self, zero_grad=False, store_weights=False, update_weight = 0.5):
         ''' store the gradients of original weights '''

@@ -235,7 +235,9 @@ def main(config, args):
                             checkpoint_dir=checkpoint_dir,
                             nsm_lam=args.nsm_lam,
                             num_perturbs=args.num_perturbs,
-                            use_neg=args.use_neg)
+                            use_neg=args.use_neg,
+                            nsm_sigma=args.nsm_sigma,
+                            nsm_sigma_schedule=args.nsm_sigma_schedule)
 
             if config["reg_method"] == "penalty":
                 lambda_extractor = config["reg_extractor"]
@@ -367,6 +369,7 @@ if __name__ == '__main__':
     args.add_argument('--num_perturbs', type=int, default=1)
     args.add_argument('--nsm_lam', type=float, default=0.5)
     args.add_argument('--nsm_distribution', type=str, default="normal")
+    args.add_argument('--nsm_sigma_schedule', type=str, default="none")
 
     args.add_argument('--train_nsmswa', action="store_true")
     args.add_argument('--use_augmentation', action="store_true")

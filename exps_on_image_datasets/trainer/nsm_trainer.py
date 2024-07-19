@@ -8,14 +8,14 @@ import os
 from .base_trainer import Trainer
 from torch.optim.swa_utils import AveragedModel, SWALR, update_bn
 from utils.constraint import add_penalty
-
+import numpy as np
 
 class NSMTrainer(Trainer):
 
     def __init__(self, model, criterion, metric_ftns, optimizer, config, device, 
                  train_data_loader, valid_data_loader=None, test_data_loader=None, 
                  lr_scheduler=None, checkpoint_dir=None,
-                 num_perturbs = 1, nsm_lam=0.5, use_neg=False):
+                 num_perturbs = 1, nsm_lam=0.5, use_neg=False, nsm_sigma=0.01, nsm_sigma_schedule="none"):
         super().__init__(model, criterion, metric_ftns, optimizer, config, device, 
                          train_data_loader, valid_data_loader, test_data_loader, 
                          lr_scheduler, checkpoint_dir)
@@ -24,6 +24,15 @@ class NSMTrainer(Trainer):
         self.use_neg = use_neg
 
         self.penalty = []
+
+        self.num_epochs = config['trainer']['epochs']
+        self.nsm_sigma_schedule = nsm_sigma_schedule
+        if self.nsm_sigma_schedule == "linear":
+            self.nsm_sigmas = np.linspace(nsm_sigma, 0, self.num_epochs)
+        elif self.nsm_sigma_schedule == "exp":
+            self.nsm_sigmas = np.exp(np.linspace(np.log(nsm_sigma), np.log(1e-5), self.num_epochs))
+        else:
+            self.nsm_sigmas = [nsm_sigma]*self.num_epochs
 
     def add_penalty(self, norm, lambda_extractor, lambda_pred_head, state_dict=None, scale_factor=1.0):
         self.penalty.append(
@@ -69,6 +78,7 @@ class NSMTrainer(Trainer):
         """
         self.model.train()
         self.train_metrics.reset()
+        self.optimizer.set_sigma(self.nsm_sigmas[epoch])
         for batch_idx, (data, target, index) in enumerate(self.train_data_loader):
             data, target = data.to(self.device), target.to(self.device)
 
