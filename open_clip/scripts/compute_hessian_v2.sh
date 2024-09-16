@@ -1,0 +1,17 @@
+CUDA_VISIBLE_DEVICES=2 python src/open_clip_train/compute_hessian_traces.py \
+    --save-frequency 1 \
+    --zeroshot-frequency 1 \
+    --report-to tensorboard \
+    --train-data ./cc3m_train/{00000..00126}.tar  \
+    --val-data ./cc3m_validation/{00000..00001}.tar   \
+    --train-num-samples 1000000\
+    --val-num-samples 15840\
+    --warmup 10000 \
+    --batch-size 16 \
+    --lr 1e-3 \
+    --wd 0.1 \
+    --epochs 30 \
+    --workers 8 \
+    --model ViT-S-16 \
+    --resume ./logs/train_sam_rho_0.02/checkpoints/epoch_10.pt --name hessian\
+    --hessian_num_batches 100

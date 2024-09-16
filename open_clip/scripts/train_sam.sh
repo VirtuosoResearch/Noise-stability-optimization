@@ -1,0 +1,33 @@
+CUDA_VISIBLE_DEVICES=2 python src/open_clip_train/main.py \
+    --save-frequency 1 \
+    --zeroshot-frequency 1 \
+    --report-to tensorboard \
+    --train-data ./cc3m_train/{00000..00126}.tar  \
+    --val-data ./cc3m_validation/{00000..00001}.tar   \
+    --train-num-samples 1000000\
+    --val-num-samples 15840\
+    --warmup 10000 \
+    --batch-size 128 \
+    --lr 1e-3 \
+    --wd 0.1 \
+    --epochs 30 \
+    --workers 8 \
+    --model ViT-S-16\
+    --train_sam --sam_rho 0.02 --name train_sam_rho_0.02
+
+CUDA_VISIBLE_DEVICES=2 python src/open_clip_train/main.py \
+    --save-frequency 1 \
+    --zeroshot-frequency 1 \
+    --report-to tensorboard \
+    --train-data ./cc3m_train/{00000..00126}.tar  \
+    --val-data ./cc3m_validation/{00000..00001}.tar   \
+    --train-num-samples 1000000\
+    --val-num-samples 15840\
+    --warmup 10000 \
+    --batch-size 128 \
+    --lr 1e-3 \
+    --wd 0.1 \
+    --epochs 30 \
+    --workers 8 \
+    --model ViT-S-16\
+    --train_sam --sam_rho 0.05 --name train_sam_rho_0.05

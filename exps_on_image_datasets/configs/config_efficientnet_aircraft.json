@@ -1,0 +1,55 @@
+{
+    "name": "EfficientNet_Birds",
+    "n_gpu": 1,
+
+    "reg_method": "none",
+    "reg_norm": "none",
+    "reg_extractor": 1,
+    "reg_predictor": 1,
+    "scale_factor": 1,
+
+    "arch": {
+        "type": "EfficientNetL2",
+        "args": {
+            "n_classes": 200
+        }
+    },
+    "data_loader": {
+        "type": "AircraftsDataLoader",
+        "args":{
+            "data_dir": "data/aircrafts/",
+            "batch_size": 256,
+            "shuffle": true,
+            "num_workers": 1
+        }
+    },
+    "optimizer": {
+        "type": "SGD",
+        "args":{
+            "lr": 0.016,
+            "weight_decay": 0.00001,
+            "momentum": 0.9
+        }
+    },
+    "loss": "nll_loss",
+    "metrics": [
+        "accuracy", "top_k_acc"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 20,
+            "gamma": 0.1
+        }
+    },
+    "trainer": {
+        "epochs": 60,
+
+        "save_dir": "saved/",
+        "save_period": 1,
+        "verbosity": 2,
+        
+        "monitor": "max val_accuracy",
+        "early_stop": 60
+    }
+}
