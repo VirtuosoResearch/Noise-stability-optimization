@@ -97,4 +97,18 @@ Thanks to the authors of the following repositories for providing their implemen
 - **[SAM Optimizer (In PyTorch)](https://github.com/davda54/sam)**
 - **[PyHessian](https://github.com/amirgholami/PyHessian)**
 - **[OpenCLIP](https://github.com/mlfoundations/open_clip)**
-- **[Reasoning Teacher](https://github.com/itsnamgyu/reasoning-teacher)**
+- **[Hessian measurements](https://github.com/VirtuosoResearch/Robust-Fine-Tuning)**
+- **[Generalization in GNN](https://github.com/VirtuosoResearch/Generalization-in-graph-neural-networks)**
+
+### Citation
+
+If you find this repository useful or happen to use it in a research paper, please cite our work with the following bib information.
+
+```tex
+@article{zhangnoise,
+  title={Noise Stability Optimization for Finding Flat Minima: A Hessian-based Regularization Approach},
+  author={Zhang, Hongyang R and Li, Dongyue and Ju, Haotian},
+  journal={Transactions on Machine Learning Research},
+  year={2024}
+}
+```
